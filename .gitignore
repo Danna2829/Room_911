@@ -1,0 +1,18 @@
+# IDE
+.idea/
+.~lock.*
+
+# Binaries / large docs
+*.docx
+*.pdf
+*.drawio.png
+Room_911-Página-*.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+dist/
+build/
