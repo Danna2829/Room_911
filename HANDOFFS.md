@@ -182,3 +182,17 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 
 - Como se hizo: Sin npm (pnpm). Contratos verificados contra controladores/DTOs reales del backend. Build verificado (pnpm build exit 0). No se pudo ejecutar el stack completo en este entorno (sin Docker/Postgres).
 - Que sigue: Prueba end-to-end con docker compose. Pulir UX (paginacion, confirmaciones) y conectar recuperacion de contrasena (/api/auth/recuperar-contrasena).
+
+---
+
+## Entrada de Handoff #012
+
+- Fecha: 28 de Agosto de 2026
+- Tema: Guia de instalacion de Docker para otra PC + verificacion de idempotencia del schema.
+
+- Que se hizo:
+  1. Se reviso schema.sql y data.sql: ya son idempotentes (CREATE TABLE IF NOT EXISTS, DROP CONSTRAINT IF EXISTS, indices IF NOT EXISTS, e INSERT ... ON CONFLICT DO NOTHING). Por tanto reiniciar el backend con el volumen persistente de Postgres no falla. No se requirio cambio de codigo.
+  2. Se anadio a README.md la seccion "Si es una PC nueva (instalar Docker)" con pasos de instalacion de Docker Desktop (Windows/macOS) y Linux (apt + docker-compose-plugin), clonado, docker compose up -d --build, comandos utiles y nota de reinicios seguros.
+
+- Como se hizo: Lectura directa de schema.sql/data.sql y documentacion en README. Sin npm (pnpm).
+- Que sigue: Prueba end-to-end en la PC destino con docker compose up -d. Opcional: agregar CI (GitHub Actions) y secretos externos para produccion.

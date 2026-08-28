@@ -34,6 +34,42 @@ Para borrar también la BD: `docker compose down -v`.
 
 > **Seguridad**: Las credenciales se toman de `.env` (ver `.env.example`). El archivo `.env` real **no** se sube al repo. En producción cambia `DB_PASSWORD` por un secreto fuerte y no reutilices la contraseña de desarrollo.
 
+### 🖥️ Si es una PC nueva (instalar Docker)
+
+El proyecto ya trae `docker-compose.yml` con **PostgreSQL, Backend y Frontend**. Solo necesitas Docker; **no** hace falta instalar Java, Maven, Node ni PostgreSQL en la PC.
+
+**1. Instalar Docker (Engine + plugin Compose):**
+- **Windows / macOS**: descarga e instala **Docker Desktop** desde https://www.docker.com/products/docker-desktop/ (o sigue https://docs.docker.com/get-docker/). Al terminar, abre Docker Desktop.
+- **Linux (Ubuntu/Debian)**:
+  ```bash
+  sudo apt-get update
+  sudo apt-get install -y docker.io docker-compose-plugin
+  sudo usermod -aG docker $USER   # luego cierra sesión y vuelve a entrar
+  ```
+- **Verificar** (debe mostrar versiones):
+  ```bash
+  docker --version
+  docker compose version
+  ```
+
+**2. Clonar y levantar el stack:**
+```bash
+git clone https://github.com/Danna2829/Room_911.git
+cd Room_911
+cp .env.example .env          # opcional: define tu DB_PASSWORD
+docker compose up -d --build  # primera vez: descarga imágenes y compila (puede tardar minutos)
+```
+- **Frontend**: http://localhost:3000  ·  **Backend**: http://localhost:8080  ·  **PostgreSQL**: localhost:5432 (BD `Sala_911`)
+- Login de prueba: `admin@farmaceutica.com` / `admin123`
+
+**3. Comandos útiles:**
+- Ver estado: `docker compose ps`
+- Ver logs del backend: `docker compose logs -f back`
+- Detener (conserva la BD): `docker compose down`
+- Reset total de la BD: `docker compose down -v`
+
+> **Reinicios seguros**: `schema.sql` usa `CREATE TABLE IF NOT EXISTS` / `DROP CONSTRAINT IF EXISTS` y `data.sql` usa `INSERT ... ON CONFLICT DO NOTHING`, por lo que el backend puede reiniciarse con el volumen persistente (`docker compose down` seguido de `docker compose up -d`) sin errores.
+
 ---
 
 ## 🚀 Cómo Ejecutar el Proyecto (desarrollo local, sin Docker)
