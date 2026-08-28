@@ -31,6 +31,12 @@ public class Usuario {
 
     private Boolean estado = true; // Valor por defecto para evitar null
 
+    @Column(name = "token_reset")
+    private String tokenReset;
+
+    @Column(name = "token_expiracion")
+    private LocalDateTime tokenExpiracion;
+
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 
@@ -80,6 +86,12 @@ public class Usuario {
     public Boolean getEstado() { return estado != null ? estado : true; }
     public Boolean isEstado() { return getEstado(); }
     public void setEstado(Boolean estado) { this.estado = (estado != null) ? estado : true; }
+
+    public String getTokenReset() { return tokenReset; }
+    public void setTokenReset(String tokenReset) { this.tokenReset = tokenReset; }
+
+    public LocalDateTime getTokenExpiracion() { return tokenExpiracion; }
+    public void setTokenExpiracion(LocalDateTime tokenExpiracion) { this.tokenExpiracion = tokenExpiracion; }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }

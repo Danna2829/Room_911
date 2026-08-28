@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 import { Icon } from "../components/ui/Icon";
 import { TextField } from "../components/ui/inputs";
 import { Button } from "../components/ui/Button";
+import { Modal } from "../components/ui/Modal";
+import { Alert } from "../components/ui/Alert";
 import { useToast } from "../components/ui/Toast";
 import { useAuth } from "../auth/AuthContext";
 
@@ -24,6 +27,8 @@ const FEATURES = [
   },
 ];
 
+const RECOVERY_INITIAL = { open: false, step: 1, correo: "", token: "", nueva: "", confirmar: "", loading: false, error: "", msg: "" };
+
 export default function Login() {
   const navigate = useNavigate();
   const toast = useToast();
@@ -31,6 +36,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [recovery, setRecovery] = useState(RECOVERY_INITIAL);
 
   const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -59,6 +65,46 @@ export default function Login() {
       toast.push({ type: "danger", title: "Acceso denegado", message: msg });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const solicitarToken = async () => {
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(recovery.correo)) {
+      setRecovery((r) => ({ ...r, error: "Correo no válido" }));
+      return;
+    }
+    setRecovery((r) => ({ ...r, loading: true, error: "" }));
+    try {
+      const { data } = await api.post("/auth/recuperar-contrasena", { correo: recovery.correo });
+      setRecovery((r) => ({ ...r, token: data.token, msg: data.mensaje, loading: false }));
+      toast.push({ type: "success", title: "Token generado" });
+    } catch (err) {
+      const m = err.response?.data?.mensaje || "No se pudo generar el token.";
+      setRecovery((r) => ({ ...r, error: m, loading: false }));
+    }
+  };
+
+  const restablecer = async () => {
+    if (recovery.nueva.length < 6) {
+      setRecovery((r) => ({ ...r, error: "La contraseña debe tener al menos 6 caracteres" }));
+      return;
+    }
+    if (recovery.nueva !== recovery.confirmar) {
+      setRecovery((r) => ({ ...r, error: "Las contraseñas no coinciden" }));
+      return;
+    }
+    setRecovery((r) => ({ ...r, loading: true, error: "" }));
+    try {
+      const { data } = await api.post("/auth/restablecer-contrasena", {
+        token: recovery.token,
+        nuevaContrasena: recovery.nueva,
+      });
+      setRecovery((r) => ({ ...r, msg: data.mensaje, loading: false }));
+      toast.push({ type: "success", title: "Contraseña restablecida", message: "Ya puedes iniciar sesión." });
+      setTimeout(() => setRecovery(RECOVERY_INITIAL), 1800);
+    } catch (err) {
+      const m = err.response?.data?.mensaje || "No se pudo restablecer.";
+      setRecovery((r) => ({ ...r, error: m, loading: false }));
     }
   };
 
@@ -144,6 +190,7 @@ export default function Login() {
                 type="button"
                 className="btn btn-link p-0 small fw-semibold"
                 style={{ color: "var(--brand-600)" }}
+                onClick={() => setRecovery({ ...RECOVERY_INITIAL, open: true })}
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -156,10 +203,97 @@ export default function Login() {
 
           <div className="divider" />
           <p className="small text-muted-2 mb-0">
-            <Icon name="info-circle" /> Cuentas de prueba: <code>admin123</code>, <code>guardia123</code>, <code>operario123</code>
+            <Icon name="info-circle" /> Cuentas de prueba: <code>admin123</code>, <code>guardia123</code>, <code>operario123</code>, <code>super123</code> (Superadmin)
           </p>
         </div>
       </main>
+
+      <Modal
+        open={recovery.open}
+        onClose={() => setRecovery(RECOVERY_INITIAL)}
+        title="Recuperar contraseña"
+        footer={
+          recovery.step === 1 ? (
+            <>
+              <Button variant="soft" onClick={() => setRecovery(RECOVERY_INITIAL)}>
+                Cancelar
+              </Button>
+              {!recovery.token ? (
+                <Button icon="key" loading={recovery.loading} onClick={solicitarToken}>
+                  Generar token
+                </Button>
+              ) : (
+                <Button icon="arrow-right" onClick={() => setRecovery((r) => ({ ...r, step: 2 }))}>
+                  Usar este token
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              <Button variant="soft" onClick={() => setRecovery((r) => ({ ...r, step: 1, nueva: "", confirmar: "", error: "" }))}>
+                Volver
+              </Button>
+              <Button icon="check-lg" loading={recovery.loading} onClick={restablecer}>
+                Restablecer contraseña
+              </Button>
+            </>
+          )
+        }
+      >
+        {recovery.step === 1 ? (
+          <>
+            <p className="text-muted mb-3">
+              Ingresa tu correo. Se generará un token de recuperación (válido 15 minutos).
+            </p>
+            <TextField
+              id="rcorreo"
+              label="Correo electrónico"
+              type="email"
+              icon="envelope"
+              placeholder="nombre@laboratorio.com"
+              value={recovery.correo}
+              onChange={(e) => setRecovery((r) => ({ ...r, correo: e.target.value }))}
+              error={recovery.error}
+            />
+            {recovery.token && (
+              <Alert variant="info">
+                Token generado: <code className="d-block mt-1">{recovery.token}</code>
+                Cópialo; en el siguiente paso lo usarás para fijar tu nueva contraseña (en producción se enviaría por correo).
+              </Alert>
+            )}
+          </>
+        ) : (
+          <>
+            <TextField
+              id="rtoken"
+              label="Token"
+              icon="key"
+              value={recovery.token}
+              onChange={(e) => setRecovery((r) => ({ ...r, token: e.target.value }))}
+            />
+            <TextField
+              id="rnew"
+              label="Nueva contraseña"
+              type="password"
+              icon="lock"
+              value={recovery.nueva}
+              onChange={(e) => setRecovery((r) => ({ ...r, nueva: e.target.value }))}
+            />
+            <TextField
+              id="rconf"
+              label="Confirmar contraseña"
+              type="password"
+              icon="lock"
+              value={recovery.confirmar}
+              onChange={(e) => setRecovery((r) => ({ ...r, confirmar: e.target.value }))}
+              error={recovery.error}
+            />
+            {recovery.msg && recovery.step === 2 && !recovery.loading && (
+              <Alert variant="success">{recovery.msg}</Alert>
+            )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

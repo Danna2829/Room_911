@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_reset VARCHAR(255);
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_expiracion TIMESTAMP;
+
 CREATE TABLE IF NOT EXISTS perfiles_operario (
     id SERIAL PRIMARY KEY,
     id_usuario VARCHAR(20) UNIQUE REFERENCES usuarios(id_usuario) ON DELETE CASCADE,

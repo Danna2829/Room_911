@@ -28,6 +28,11 @@ VALUES
 ('EMP-8823', 'Pedro', 'Operario Tres', 'operario3@farmaceutica.com', 'OPERARIO', 'operario123', TRUE)
 ON CONFLICT (id_usuario) DO NOTHING;
 
+-- 3b. Superadministrador (jerarquía superior de la plataforma)
+INSERT INTO usuarios (id_usuario, nombre, apellido, correo, rol, contrasena, estado)
+VALUES ('EMP-0000', 'Super', 'Administrador', 'superadmin@farmaceutica.com', 'SUPERADMINISTRADOR', 'super123', TRUE)
+ON CONFLICT (id_usuario) DO NOTHING;
+
 -- 4. Perfiles de Operario
 INSERT INTO perfiles_operario (id_usuario, nivel_acceso, descripcion)
 VALUES

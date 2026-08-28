@@ -4,6 +4,84 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 
 ---
 
+## 📝 Entrada de Handoff #015
+
+- **Fecha**: 28 de Agosto de 2026
+- **Autor / Agente**: OpenCode Assistant
+- **Estado del Sprint**: Recuperación de Contraseña (HU-002) + Jerarquía ADMIN / SUPERADMINISTRADOR.
+
+### 🎯 1. ¿Qué se hizo?
+1. **Nuevo rol SUPERADMINISTRADOR**:
+   - Seed en `data.sql`: usuario `EMP-0000` / `superadmin@farmaceutica.com` / `super123` (rol `SUPERADMINISTRADOR`).
+   - `Usuario.rol` es un string libre; el servicio ya lo valida en mayúsculas. Se refleja en el dropdown de roles y en el `StatusPill` del frontend (`Usuarios.jsx`).
+2. **Recuperación self-service con token (HU-002)** — endpoint real (antes era stub):
+   - `POST /api/auth/recuperar-contrasena` {correo}: genera `tokenReset` UUID con vigencia 15 min (`token_expiracion`), lo persiste y lo devuelve.
+   - Nuevo `POST /api/auth/restablecer-contrasena` {token, nuevaContrasena}: valida token existente y no expirado, fija la contraseña, limpia el token. Mínimo 6 caracteres.
+   - Campos nuevos en `Usuario` (`tokenReset`, `tokenExpiracion`) + migración idempotente en `schema.sql` (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`) + `findByTokenReset` en `UsuarioRepository`.
+3. **Reset por SUPERADMINISTRADOR** (mecanismo 2, elegido por el usuario):
+   - Nuevo `POST /api/admin/reset-password` {idUsuario, solicitanteId}: genera contraseña temporal `Temp-XXXXXX`, la devuelve para entrega fuera de banda, y borra cualquier token de recovery pendiente.
+   - Guarda de jerarquía: si se envía `solicitanteId`, se verifica que su rol sea `SUPERADMINISTRADOR` (403 en caso contrario). El frontend solo muestra el botón "Restablecer" cuando el usuario logueado es SUPERADMINISTRADOR.
+4. **Frontend**:
+   - `Login.jsx`: el link "¿Olvidaste tu contraseña?" abre un modal de 2 pasos (solicitar token → restablecer contraseña).
+   - `Usuarios.jsx`: rol `SUPERADMINISTRADOR` en el catálogo; botón "Restablecer" (solo superadmin) que muestra la contraseña temporal en un modal.
+
+### 🔍 2. ¿Cómo se hizo?
+- Compilación local offline del backend (`./mvnw -o compile` -> OK) y build local del frontend (`pnpm build` -> OK) antes de reconstruir imágenes.
+- `docker compose up -d --build` y pruebas end-to-end con `curl` contra `http://localhost:8080/api`:
+  - Login superadmin → 200 (`rol: SUPERADMINISTRADOR`).
+  - recuperar-contrasena (operario1) → token; restablecer-contrasena → 200; login con nueva pass → 200.
+  - reset-password por superadmin (EMP-0000) → `tempPassword` devuelto.
+  - reset-password por admin (EMP-0001) → **HTTP 403** (guarda de jerarquía ok).
+  - Se restauró la contraseña de prueba de `operario1` a `operario123` tras las pruebas.
+
+### ⚠️ 3. Notas / Limitaciones
+- **Contraseñas en texto plano**: el sistema ya las guardaba así (`AuthController` compara strings). El token y la temp password viajan por HTTP en localhost. Recomendado: migrar a `BCryptPasswordEncoder` + HTTPS en producción.
+- **Autorización server-side es best-effort**: todo `/api/**` es `permitAll` (no hay JWT/sesión). El chequeo de rol en `reset-password` confía en `solicitanteId` enviado por el cliente, coherente con el resto de la app. Para reforzar, añadir JWT y filtros de seguridad.
+- Cambios de código **sin commit** (no solicitado).
+
+### ▶️ 4. Próximos pasos
+- (Opcional) Endpoint de cambio de contraseña propio del usuario autenticado.
+- (Opcional) Hash de contraseñas con BCrypt + JWT para authz real.
+- Commit + push de los cambios de backend y frontend.
+
+---
+
+## 📝 Entrada de Handoff #014
+
+- **Fecha**: 28 de Agosto de 2026
+- **Autor / Agente**: OpenCode Assistant
+- **Estado del Sprint**: Instalación de Docker en Ubuntu y Puesta en Marcha del Stack Completo (db + back + front).
+
+### 🎯 1. ¿Qué se hizo?
+1. **Instalación de Docker Engine + Compose v2 en Ubuntu 24.04** (host real, systemd pid1):
+   - Repo oficial de Docker (`download.docker.com`), paquetes `docker-ce`, `docker-ce-cli`, `containerd.io`, `docker-buildx-plugin`, `docker-compose-plugin`.
+   - Método `SUDO_ASKPASS` (helper temporal en `/tmp/askpass.sh`) porque el entorno de shell no tiene TTY y sudo tiene `requiretty`. Verificado con `docker run hello-world` (daemon activo).
+   - `usermod -aG docker $USER` aplicado; requiere re-login o `newgrp docker` para usar `docker` sin sudo.
+2. **Corrección del build del frontend (Dockerfile)**:
+   - Causa: `pnpm install --frozen-lockfile` abortaba con `ERR_PNPM_IGNORED_BUILDS` porque el gate de build scripts de pnpm v11 (`@parcel/watcher`) se define en `pnpm-workspace.yaml` y ese archivo NO se copiaba antes del install.
+   - Fix: `COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./` antes de `RUN pnpm install --frozen-lockfile`.
+3. **Resolución de conflictos de puertos en el host**:
+   - Puerto `5432` ocupado por PostgreSQL 16 local (servicio `postgresql` de systemd, activo). Se cambió el mapeo del contenedor `db` a `5433:5432` en `docker-compose.yml` (el backend sigue conectando por la red interna a `db:5432`).
+   - Puertos `3000` y `8080` ocupados por servidores de dev locales dejados corriendo (react-scripts PID 1221503 y Spring Boot PID 1220972). Se detuvieron para liberar los puertos estándar del stack Docker.
+4. **Contenedor `back` fuera de la red de compose**:
+   - Por los arranques fallidos previos (puertos), `reto_911-back-1` quedó sin adjuntar a `reto_911_default` → `UnknownHostException: db` y fallo de Hibernate al determinar Dialect.
+   - Fix: `docker compose down` + `docker compose up -d` limpio (el volumen `pgdata` persiste, no se pierden datos).
+
+### 🔍 2. ¿Cómo se hizo?
+- Inspección empírica: `ss -ltnp` para dueños de puertos, `docker network inspect` para ver contenedores conectados, `docker compose logs back` para la causa raíz (`Caused by: java.net.UnknownHostException: db`), y `curl` contra la API para verificar.
+- Verificación de extremo a extremo: login `POST /api/auth/login` → **HTTP 200** (`{"nombre":"Admin Sistema","rol":"ADMINISTRADOR",...}`); frontend `http://localhost:3000` → **HTTP 200** (HTML servido).
+
+### ⚠️ 3. Estado / Pendientes
+- Cambios sin commit (Dockerfile y docker-compose.yml). No se hizo commit ni push (no solicitado).
+- El usuario indicó que cambiará la clave sudo temporal (`senafactory*`) tras la instalación.
+
+### ▶️ 4. Próximos pasos
+- Abrir http://localhost:3000 (login `admin@farmaceutica.com` / `admin123`) y validar el flujo completo de vistas.
+- Opcional: commit + push de los ajustes de Dockerfile y docker-compose.yml.
+- Opcional: detener el PostgreSQL local (puerto 5432) si se desea usar `5432` también para el contenedor.
+
+---
+
 ## 📝 Entrada de Handoff #013
 
 - **Fecha**: 28 de Agosto de 2026

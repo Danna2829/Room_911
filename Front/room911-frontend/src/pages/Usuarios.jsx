@@ -9,8 +9,10 @@ import { Modal } from "../components/ui/Modal";
 import { DataTable } from "../components/ui/DataTable";
 import { useToast } from "../components/ui/Toast";
 import { useFetch } from "../hooks/useFetch";
+import { useAuth } from "../auth/AuthContext";
 
 const ROLES = [
+  { value: "SUPERADMINISTRADOR", label: "SUPERADMINISTRADOR" },
   { value: "ADMINISTRADOR", label: "ADMINISTRADOR" },
   { value: "GUARDIA_SEGURIDAD", label: "GUARDIA_SEGURIDAD" },
   { value: "OPERARIO", label: "OPERARIO" },
@@ -19,9 +21,11 @@ const ROLES = [
 
 export default function Usuarios() {
   const toast = useToast();
+  const { user } = useAuth();
   const { data: lista, loading, error, reload } = useFetch(() => api.get("/admin/listar-usuarios").then((r) => r.data));
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [reset, setReset] = useState({ open: false, target: null, loading: false, tempPassword: "", error: "" });
   const [form, setForm] = useState({
     idUsuario: "",
     nombre: "",
@@ -71,6 +75,22 @@ export default function Usuarios() {
     }
   };
 
+  const resetear = async (u) => {
+    setReset({ open: true, target: u, loading: true, tempPassword: "", error: "" });
+    try {
+      const { data } = await api.post("/admin/reset-password", {
+        idUsuario: u.idUsuario,
+        solicitanteId: user?.idUsuario,
+      });
+      setReset({ open: true, target: u, loading: false, tempPassword: data.tempPassword, error: "" });
+      toast.push({ type: "success", title: "Contraseña restablecida" });
+      reload();
+    } catch (err) {
+      const m = err.response?.data?.mensaje || "No se pudo restablecer la contraseña.";
+      setReset({ open: true, target: u, loading: false, tempPassword: "", error: m });
+    }
+  };
+
   const columns = [
     { key: "idUsuario", label: "ID", sortable: true },
     { key: "nombre", label: "Nombre", sortable: true, render: (r) => `${r.nombre || ""} ${r.apellido || ""}`.trim() },
@@ -79,11 +99,17 @@ export default function Usuarios() {
       key: "rol",
       label: "Rol",
       sortable: true,
-      render: (r) => (
-        <StatusPill tone={r.rol === "ADMINISTRADOR" ? "info" : r.rol === "GUARDIA_SEGURIDAD" ? "warning" : "success"}>
-          {r.rol}
-        </StatusPill>
-      ),
+      render: (r) => {
+        const tone =
+          r.rol === "SUPERADMINISTRADOR"
+            ? "danger"
+            : r.rol === "ADMINISTRADOR"
+            ? "info"
+            : r.rol === "GUARDIA_SEGURIDAD"
+            ? "warning"
+            : "success";
+        return <StatusPill tone={tone}>{r.rol}</StatusPill>;
+      },
     },
     {
       key: "estado",
@@ -91,20 +117,25 @@ export default function Usuarios() {
       sortable: true,
       render: (r) => <StatusPill tone={r.estado ? "success" : "neutral"}>{r.estado ? "Activo" : "Inactivo"}</StatusPill>,
     },
-    {
-      key: "acc",
-      label: "",
-      render: (r) => (
-        <div className="d-flex gap-2">
-          <Button variant="soft" size="sm" icon="pencil" onClick={() => openEdit(r)}>
-            Editar
-          </Button>
-          <Button variant="outline" size="sm" icon="trash" onClick={() => eliminar(r.idUsuario)}>
-            Eliminar
-          </Button>
-        </div>
-      ),
-    },
+      {
+        key: "acc",
+        label: "",
+        render: (r) => (
+          <div className="d-flex gap-2">
+            {user?.rol === "SUPERADMINISTRADOR" && (
+              <Button variant="soft" size="sm" icon="key" onClick={() => resetear(r)}>
+                Restablecer
+              </Button>
+            )}
+            <Button variant="soft" size="sm" icon="pencil" onClick={() => openEdit(r)}>
+              Editar
+            </Button>
+            <Button variant="outline" size="sm" icon="trash" onClick={() => eliminar(r.idUsuario)}>
+              Eliminar
+            </Button>
+          </div>
+        ),
+      },
   ];
 
   return (
@@ -200,6 +231,37 @@ export default function Usuarios() {
             />
           </div>
         </div>
+      </Modal>
+
+      <Modal
+        open={reset.open}
+        onClose={() => setReset({ open: false, target: null, loading: false, tempPassword: "", error: "" })}
+        title="Restablecer contraseña"
+        footer={
+          <Button onClick={() => setReset({ open: false, target: null, loading: false, tempPassword: "", error: "" })}>
+            Cerrar
+          </Button>
+        }
+      >
+        {reset.loading ? (
+          <div className="text-center py-3">
+            <Spinner />
+          </div>
+        ) : reset.error ? (
+          <Alert variant="danger">{reset.error}</Alert>
+        ) : reset.tempPassword ? (
+          <>
+            <p>
+              Contraseña temporal generada para <strong>{reset.target?.correo}</strong>:
+            </p>
+            <div className="alert alert-light border rounded p-3 mb-2">
+              <code style={{ fontSize: "1.1rem" }}>{reset.tempPassword}</code>
+            </div>
+            <Alert variant="info">
+              Entrégala al usuario por canal seguro. Deberá cambiarla luego desde la edición de su usuario.
+            </Alert>
+          </>
+        ) : null}
       </Modal>
     </>
   );
