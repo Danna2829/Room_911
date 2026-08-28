@@ -1,0 +1,75 @@
+// ============================================================
+// Room_911 — Design Tokens (pharma high-end, blue family)
+// White / Navy / Blue / Celeste / Black
+// ============================================================
+
+:root {
+  // --- Brand blues ---
+  --brand-900: #062A4F;
+  --brand-800: #0A3A6B;
+  --brand-700: #0E4F8F;
+  --brand-600: #1466B8;   // primary
+  --brand-500: #2A7FD6;
+  --brand-400: #5AA0E6;
+  --brand-300: #9CC6F2;
+  --brand-200: #CFE3F8;
+  --brand-100: #E8F2FB;
+  --brand-50:  #F4F9FE;
+  --celeste:   #D6ECFB;
+
+  // --- Neutrals ---
+  --white:    #FFFFFF;
+  --black:    #0B0F17;
+  --ink:      #101826;     // primary text
+  --ink-soft: #33415C;
+  --muted:    #5B6675;     // secondary text
+  --muted-2:  #8A95A5;
+  --border:   #E4E9F0;
+  --border-strong: #CDD7E3;
+  --surface:  #FFFFFF;
+  --surface-2: #F4F7FB;    // app background
+  --surface-3: #EEF3F9;
+
+  // --- Semantic ---
+  --success: #1F9D6B;
+  --success-bg: #E7F6EF;
+  --warning: #E0A100;
+  --warning-bg: #FCF3DD;
+  --danger:  #D6455B;
+  --danger-bg: #FBE9EC;
+  --info:    #2A7FD6;
+  --info-bg: #E8F2FB;
+
+  // --- Typography ---
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  // --- Radii ---
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  // --- Spacing scale (4px base) ---
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  // --- Shadows ---
+  --shadow-xs: 0 1px 2px rgba(16, 24, 38, 0.06);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 38, 0.08), 0 1px 2px rgba(16, 24, 38, 0.04);
+  --shadow-md: 0 4px 12px rgba(16, 24, 38, 0.08), 0 2px 4px rgba(16, 24, 38, 0.04);
+  --shadow-lg: 0 12px 28px rgba(16, 24, 38, 0.12), 0 4px 8px rgba(16, 24, 38, 0.06);
+  --shadow-focus: 0 0 0 4px rgba(20, 102, 184, 0.18);
+
+  // --- Layout ---
+  --sidebar-w: 256px;
+  --topbar-h: 64px;
+  --content-max: 1320px;
+}

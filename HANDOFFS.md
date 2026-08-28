@@ -146,3 +146,21 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 
 - **Cómo se hizo**: Edición directa de archivos, sin `npm`, validando YAML de compose y que `.env` quede ignorado.
 - **Qué sigue**: Probar `docker compose up -d` en la PC personal; añadir CI (GitHub Actions: `mvn test` + `pnpm build`) y considerar secretos externos para producción.
+
+---
+
+## Entrada de Handoff #010
+
+- Fecha: 28 de Agosto de 2026
+- Tema: Design System Frontend (Bootstrap 5 + SCSS) y pantalla Login.
+
+- Que se hizo:
+  1. Dependencias con pnpm: bootstrap, bootstrap-icons, sass, react-router-dom.
+  2. Tokens en _tokens.scss (paleta azul/navy/celeste/blanco/negro) y overrides en _bootstrap-theme.scss (tipografia Inter + Plus Jakarta Sans).
+  3. Libreria de componentes src/components/ui/: Button, TextField/SelectField/Slider, Modal, Alert, Toast (+ useToast/ToastProvider), StatusPill, Spinner, EmptyState, StatCard, DataTable (buscador+filtros+orden), PageHeader, Icon.
+  4. Layout shell (Sidebar + Topbar) con React Router (/login, /dashboard, /usuarios, etc.).
+  5. Login (split, validacion, toast) y Dashboard demo. Resto de modulos como ComingSoon.
+  6. README con guia del design system.
+
+- Como se hizo: pnpm (sin npm). Build verificado (exit 0). Se requirio pnpm approve-builds --all para @parcel/watcher.
+- Que sigue: Vistas reales (Garita, Cronograma, Usuarios, Inventario, Reportes) sobre DataTable/Modal/Toast; conectar Login con /api/auth.

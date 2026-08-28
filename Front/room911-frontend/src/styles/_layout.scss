@@ -1,0 +1,140 @@
+// ============================================================
+// Room_911 — App shell & layout (sidebar / topbar / login)
+// ============================================================
+
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+}
+
+// ---------- Sidebar ----------
+.r911-sidebar {
+  background: var(--brand-900);
+  background: linear-gradient(180deg, var(--brand-900) 0%, var(--brand-800) 100%);
+  color: #fff;
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  padding: 20px 14px;
+  overflow-y: auto;
+}
+.r911-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 10px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 14px;
+}
+.r911-brand .brand-mark {
+  width: 40px; height: 40px; border-radius: 11px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.12); color: #fff; font-size: 1.3rem;
+}
+.r911-brand .brand-name { font-family: var(--font-display); font-weight: 800; font-size: 1.02rem; line-height: 1.1; }
+.r911-brand .brand-sub { font-size: 0.72rem; color: rgba(255,255,255,0.6); }
+
+.r911-nav { display: flex; flex-direction: column; gap: 4px; }
+.r911-nav .nav-section {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.45); font-weight: 700;
+  padding: 14px 12px 6px;
+}
+.r911-nav .nav-link-r911 {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  color: rgba(255,255,255,0.72); font-weight: 500; font-size: 0.92rem;
+  transition: background-color .15s ease, color .15s ease;
+  cursor: pointer;
+}
+.r911-nav .nav-link-r911 .bi { font-size: 1.15rem; }
+.r911-nav .nav-link-r911:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.r911-nav .nav-link-r911.active {
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+  color: #fff; font-weight: 600;
+  box-shadow: 0 6px 16px rgba(10, 58, 107, 0.45);
+}
+.r911-sidebar-foot { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+.r911-user {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm);
+}
+.r911-user .avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--brand-500); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700;
+}
+.r911-user .u-name { font-size: 0.85rem; font-weight: 600; color: #fff; }
+.r911-user .u-role { font-size: 0.72rem; color: rgba(255,255,255,0.55); }
+
+// ---------- Main column ----------
+.r911-main { display: flex; flex-direction: column; min-width: 0; }
+
+.r911-topbar {
+  height: var(--topbar-h);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 24px; position: sticky; top: 0; z-index: 20;
+}
+.r911-topbar .topbar-search {
+  position: relative; flex: 1 1 320px; max-width: 420px;
+}
+.r911-topbar .topbar-search .bi { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted-2); }
+.r911-topbar .topbar-search .form-control { padding-left: 40px; background: var(--surface-2); border-color: transparent; }
+.r911-topbar .topbar-search .form-control:focus { background: #fff; }
+.r911-topbar .topbar-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.topbar-icon-btn {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: #fff; color: var(--ink-soft);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem;
+  position: relative; cursor: pointer; transition: background-color .15s ease;
+}
+.topbar-icon-btn:hover { background: var(--surface-2); }
+.topbar-icon-btn .badge-dot {
+  position: absolute; top: 6px; right: 7px; width: 8px; height: 8px;
+  background: var(--danger); border-radius: 999px; border: 2px solid #fff;
+}
+
+.r911-content { padding: 28px 24px 40px; }
+.r911-content-inner { max-width: var(--content-max); margin: 0 auto; }
+
+// ---------- Login ----------
+.login-screen { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr; }
+.login-aside {
+  position: relative; overflow: hidden;
+  background: linear-gradient(150deg, var(--brand-800) 0%, var(--brand-600) 55%, var(--brand-400) 130%);
+  color: #fff; padding: 56px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.login-aside::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(540px 540px at 85% 15%, rgba(255,255,255,0.16), transparent 60%),
+    radial-gradient(420px 420px at 10% 95%, rgba(20,102,184,0.45), transparent 60%);
+}
+.login-aside > * { position: relative; z-index: 1; }
+.login-aside .aside-feature {
+  display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.16); border-radius: var(--radius);
+  background: rgba(255,255,255,0.07); margin-bottom: 14px; backdrop-filter: blur(4px);
+}
+.login-aside .aside-feature .bi { font-size: 1.4rem; margin-top: 2px; }
+.login-aside .aside-feature h4 { margin: 0 0 2px; font-size: 0.98rem; }
+.login-aside .aside-feature p { margin: 0; font-size: 0.85rem; color: rgba(255,255,255,0.78); }
+
+.login-main { display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--surface-2); }
+.login-card { width: 100%; max-width: 420px; }
+.login-card .login-title { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; margin: 0; }
+.login-card .login-sub { color: var(--muted); margin: 6px 0 28px; }
+.login-brand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+.login-brand-row .brand-mark {
+  width: 44px; height: 44px; border-radius: 12px; background: var(--brand-600); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+
+// ---------- Responsive ----------
+@media (max-width: 991px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .r911-sidebar { position: fixed; z-index: 40; width: var(--sidebar-w); transform: translateX(-100%); transition: transform .25s ease; }
+  .app-shell.nav-open .r911-sidebar { transform: none; }
+  .login-screen { grid-template-columns: 1fr; }
+  .login-aside { display: none; }
+}

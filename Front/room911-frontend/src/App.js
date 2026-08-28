@@ -1,80 +1,32 @@
-import React, { useState } from 'react';
-import SimuladorGarita from './components/SimuladorGarita';
-import PanelSecretaria from './components/PanelSecretaria';
-import PanelGuardia from './components/PanelGuardia';
-import AdminUsuarios from './components/AdminUsuarios';
-import PanelReportes from './components/PanelReportes';
-import PanelInventario from './components/PanelInventario';
-import './App.css';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ToastProvider } from "./components/ui/Toast";
+import Login from "./pages/Login";
+import AppLayout from "./components/layout/AppLayout";
+import Dashboard from "./pages/Dashboard";
+import ComingSoon from "./pages/ComingSoon";
 
-function App() {
-  const [tabActiva, setTabActiva] = useState('GARITA');
-
+export default function App() {
   return (
-    <div className="app-container">
-      {/* Header Principal */}
-      <header className="app-header">
-        <div className="header-brand">
-          <h1>🔬 Sistema room_911</h1>
-          <span>Control de Acceso Dinámico por Matriz de Riesgo y Cronograma (ABAC/RBAC)</span>
-        </div>
+    <BrowserRouter>
+      <ToastProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
 
-        {/* Navegación por pestañas */}
-        <nav className="nav-tabs">
-          <button 
-            className={`nav-item ${tabActiva === 'GARITA' ? 'active' : ''}`}
-            onClick={() => setTabActiva('GARITA')}
-          >
-            🚪 Garita / Torniquete
-          </button>
-          <button 
-            className={`nav-item ${tabActiva === 'SECRETARIA' ? 'active' : ''}`}
-            onClick={() => setTabActiva('SECRETARIA')}
-          >
-            📅 Secretaría (Cronograma)
-          </button>
-          <button 
-            className={`nav-item ${tabActiva === 'GUARDIA' ? 'active' : ''}`}
-            onClick={() => setTabActiva('GUARDIA')}
-          >
-            🛡️ Guardia (Seguridad & Monitor)
-          </button>
-          <button 
-            className={`nav-item ${tabActiva === 'ADMIN' ? 'active' : ''}`}
-            onClick={() => setTabActiva('ADMIN')}
-          >
-            👤 Usuarios (Admin)
-          </button>
-          <button 
-            className={`nav-item ${tabActiva === 'REPORTES' ? 'active' : ''}`}
-            onClick={() => setTabActiva('REPORTES')}
-          >
-            📊 Auditoría & Reportes
-          </button>
-          <button 
-            className={`nav-item ${tabActiva === 'INVENTARIO' ? 'active' : ''}`}
-            onClick={() => setTabActiva('INVENTARIO')}
-          >
-            💊 Inventario & Categorías
-          </button>
-        </nav>
-      </header>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/garita" element={<ComingSoon title="Garita / Torniquete" />} />
+            <Route path="/cronograma" element={<ComingSoon title="Cronograma Operativo" />} />
+            <Route path="/monitor" element={<ComingSoon title="Monitor en Vivo" />} />
+            <Route path="/usuarios" element={<ComingSoon title="Gestión de Usuarios" />} />
+            <Route path="/inventario" element={<ComingSoon title="Inventario & Categorías" />} />
+            <Route path="/reportes" element={<ComingSoon title="Reportes & Auditoría" />} />
+            <Route path="/config" element={<ComingSoon title="Configuración" />} />
+          </Route>
 
-      {/* Contenido Principal */}
-      <main className="app-main">
-        {tabActiva === 'GARITA' && <SimuladorGarita />}
-        {tabActiva === 'SECRETARIA' && <PanelSecretaria />}
-        {tabActiva === 'GUARDIA' && <PanelGuardia />}
-        {tabActiva === 'ADMIN' && <AdminUsuarios />}
-        {tabActiva === 'REPORTES' && <PanelReportes />}
-        {tabActiva === 'INVENTARIO' && <PanelInventario />}
-      </main>
-
-      <footer className="app-footer">
-        <p>Laboratorio Farmacéutico room_911 — Programa de Aceleración Técnica</p>
-      </footer>
-    </div>
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </ToastProvider>
+    </BrowserRouter>
   );
 }
-
-export default App;

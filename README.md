@@ -99,3 +99,47 @@ pnpm start
 - `HISTORIAS_DE_USUARIO.md`: Fichas detalladas de las 28 HUs.
 - `PLAN_DE_ACCION.md`: Cronograma por fases del sprint de 15 días.
 - `HANDOFFS.md`: Bitácora de trazabilidad e historial continuo.
+
+---
+
+## 🎨 Frontend — Design System (Room_911 UI)
+
+Stack: **React 19 + Vite/CRA + Bootstrap 5 (SCSS theming) + Bootstrap Icons + React Router**. `npm` está prohibido; usar siempre `pnpm`.
+
+### Instalación
+```bash
+cd Front/room911-frontend
+pnpm install
+pnpm start          # dev  -> http://localhost:3000
+pnpm build          # producción
+```
+> **Nota (pnpm + build scripts)**: En la primera instalación pnpm puede bloquear scripts de build por política de supply-chain. Si `pnpm install` falla, ejecuta una vez:
+> ```bash
+> pnpm approve-builds --all
+> ```
+
+### Tokens y tema
+- Paleta de marca en `src/styles/_tokens.scss` (azul navy / azul / celeste / blanco / negro).
+- Overrides de Bootstrap en `src/styles/_bootstrap-theme.scss`.
+- Estilos de componentes y layout en `_components.scss` / `_layout.scss`; punto de entrada: `src/styles/index.scss`.
+
+### Librería de componentes (`src/components/ui/`)
+Estándar reutilizable para todas las vistas:
+- `Button` (variantes `primary|soft|outline|dark|danger|...`, `loading`, `icon`)
+- `TextField`, `SelectField`, `Slider` (con ícono e validación)
+- `Modal` (sin JS de Bootstrap, accesible por teclado)
+- `Alert` (éxito/info/warning/danger)
+- `Toast` + `useToast()` (feedback global con `ToastProvider`)
+- `StatusPill`, `Spinner`, `EmptyState`, `StatCard`
+- `DataTable` (buscador global, filtros por columna y ordenamiento — patrón CRUD estándar)
+- `PageHeader`, `Icon`
+
+### Layout (`src/components/layout/`)
+`AppLayout` = `Sidebar` (navegación por secciones) + `Topbar` (búsqueda global y acciones) + contenido con `max-width` estandarizado. Las vistas se enrutan con React Router (`/login`, `/dashboard`, `/usuarios`, `/inventario`, etc.).
+
+### Estado actual
+- ✅ Fundación del design system, `Login` (pantalla dividida, validación + toast) y `AppLayout`/shell.
+- ✅ `Dashboard` demo usando `StatCard` + `DataTable` + `Modal` para validar el sistema.
+- 🚧 El resto de módulos (`Garita`, `Cronograma`, `Usuarios`, `Inventario`, `Reportes`) son `ComingSoon` y se construirán sobre estos mismos componentes.
+- ⚠️ `pnpm build` compila limpio; aparecen 3 avisos cosméticos de `postcss-svgo` por los data-URI SVG de Bootstrap Icons (no afectan el resultado ni los íconos, que usan fuente).
+
