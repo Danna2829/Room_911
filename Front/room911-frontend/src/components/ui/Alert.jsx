@@ -1,9 +1,9 @@
 import { Icon } from "./Icon";
 
-export function Alert({ variant = "info", icon, title, children, onClose }) {
+export function Alert({ variant = "info", icon, title, children, onClose, className = "" }) {
   const ic = icon || (variant === "success" ? "check-circle-fill" : variant === "danger" ? "x-circle-fill" : variant === "warning" ? "exclamation-triangle-fill" : "info-circle-fill");
   return (
-    <div className={`alert-r911 alert-${variant}`} role="alert">
+    <div className={`alert-r911 alert-${variant} ${className}`} role="alert">
       <Icon name={ic} />
       <div style={{ flex: 1 }}>
         {title && <div style={{ fontWeight: 700, marginBottom: 2 }}>{title}</div>}

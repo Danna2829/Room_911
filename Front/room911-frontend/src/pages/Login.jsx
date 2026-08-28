@@ -4,6 +4,7 @@ import { Icon } from "../components/ui/Icon";
 import { TextField } from "../components/ui/inputs";
 import { Button } from "../components/ui/Button";
 import { useToast } from "../components/ui/Toast";
+import { useAuth } from "../auth/AuthContext";
 
 const FEATURES = [
   {
@@ -26,6 +27,7 @@ const FEATURES = [
 export default function Login() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -41,19 +43,23 @@ export default function Login() {
     return Object.keys(e).length === 0;
   };
 
-  const submit = (ev) => {
+  const submit = async (ev) => {
     ev.preventDefault();
     if (!validate()) {
       toast.push({ type: "danger", title: "Formulario incompleto", message: "Revisa los campos marcados." });
       return;
     }
     setLoading(true);
-    // Simulación de autenticación (conectar con /api/auth al tener backend).
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await login(form.email, form.password);
       toast.push({ type: "success", title: "Bienvenido", message: "Sesión iniciada correctamente." });
       navigate("/dashboard");
-    }, 900);
+    } catch (err) {
+      const msg = err.response?.data?.mensaje || "No se pudo iniciar sesión.";
+      toast.push({ type: "danger", title: "Acceso denegado", message: msg });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

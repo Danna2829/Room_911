@@ -138,8 +138,27 @@ Estándar reutilizable para todas las vistas:
 `AppLayout` = `Sidebar` (navegación por secciones) + `Topbar` (búsqueda global y acciones) + contenido con `max-width` estandarizado. Las vistas se enrutan con React Router (`/login`, `/dashboard`, `/usuarios`, `/inventario`, etc.).
 
 ### Estado actual
-- ✅ Fundación del design system, `Login` (pantalla dividida, validación + toast) y `AppLayout`/shell.
-- ✅ `Dashboard` demo usando `StatCard` + `DataTable` + `Modal` para validar el sistema.
-- 🚧 El resto de módulos (`Garita`, `Cronograma`, `Usuarios`, `Inventario`, `Reportes`) son `ComingSoon` y se construirán sobre estos mismos componentes.
+- ✅ Fundación del design system, `AppLayout`/shell con `Sidebar` + `Topbar` (logout) y `Login` (pantalla dividida, validación + toast).
+- ✅ **Autenticación real**: `AuthContext` + `RequireAuth` conectados a `POST /api/auth/login` (campos `correo`/`contraseña`). Sesión en `localStorage`.
+- ✅ Vistas funcionales conectadas a la API (todas sobre `DataTable`/`Modal`/`Toast`/`StatusPill`):
+  - `Garita` → `POST /api/acceso/evaluar` (motor ABAC) + historial de sesión.
+  - `Cronograma` → `GET/POST /api/cronograma` + `GET /api/categorias`.
+  - `Monitor` → `GET /api/acceso/monitor` + suspensiones (`POST /api/guardia/suspender`, `GET /api/guardia/suspensiones`, revocar).
+  - `Usuarios` → CRUD `GET/POST/PUT/DELETE /api/admin/*`.
+  - `Inventario` → `GET /api/inventario`, `POST /api/inventario/entrada|salida`, `GET /api/categorias`.
+  - `Reportes` → `GET /api/reportes/accesos` + exportar CSV (`GET /api/reportes/exportar/csv`).
+- ✅ `Dashboard` demo usando `StatCard` + `DataTable` + `Modal`.
 - ⚠️ `pnpm build` compila limpio; aparecen 3 avisos cosméticos de `postcss-svgo` por los data-URI SVG de Bootstrap Icons (no afectan el resultado ni los íconos, que usan fuente).
+
+### Cómo probar end-to-end
+```bash
+# Terminal 1 — stack completo (requiere Docker)
+docker compose up -d            # db + backend + frontend
+# Abrir http://localhost:3000  (frontend)  — login con admin@farmaceutica.com / admin123
+
+# O bien, solo el backend con Docker y el frontend local:
+docker compose up -d db back
+cd Front/room911-frontend && pnpm install && pnpm start
+```
+
 

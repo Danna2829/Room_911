@@ -164,3 +164,21 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 
 - Como se hizo: pnpm (sin npm). Build verificado (exit 0). Se requirio pnpm approve-builds --all para @parcel/watcher.
 - Que sigue: Vistas reales (Garita, Cronograma, Usuarios, Inventario, Reportes) sobre DataTable/Modal/Toast; conectar Login con /api/auth.
+
+---
+
+## Entrada de Handoff #011
+
+- Fecha: 28 de Agosto de 2026
+- Tema: Vistas reales conectadas a la API + Login con autenticacion real.
+
+- Que se hizo:
+  1. AuthContext (login a POST /api/auth/login con correo/contrasena, sesion en localStorage) + RequireAuth para proteger rutas.
+  2. Hook useFetch y util format (fechas es-CO).
+  3. Login conectado a la API real (manejo de error con mensaje del backend).
+  4. Vistas funcionales sobre el design system: Garita (ABAC /api/acceso/evaluar), Cronograma (/api/cronograma + /api/categorias), Monitor (/api/acceso/monitor + suspensiones /api/guardia/*), Usuarios (CRUD /api/admin/*), Inventario (GET /api/inventario, POST entrada|salida, /api/categorias), Reportes (/api/reportes/accesos + exportar CSV).
+  5. Topbar con logout y Sidebar con usuario autenticado (nombre/rol/iniciales).
+  6. README actualizado con estado y prueba end-to-end (docker compose up -d).
+
+- Como se hizo: Sin npm (pnpm). Contratos verificados contra controladores/DTOs reales del backend. Build verificado (pnpm build exit 0). No se pudo ejecutar el stack completo en este entorno (sin Docker/Postgres).
+- Que sigue: Prueba end-to-end con docker compose. Pulir UX (paginacion, confirmaciones) y conectar recuperacion de contrasena (/api/auth/recuperar-contrasena).
