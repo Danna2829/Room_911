@@ -10,7 +10,36 @@ Sistema integral de gestión y control de acceso dinámico por Matriz de Riesgo 
 
 ---
 
-## 🚀 Cómo Ejecutar el Proyecto
+## ⚡ Instalación Rápida con Docker (recomendado)
+
+Todo el stack (PostgreSQL + Backend + Frontend) levanta con **un solo comando**, sin instalar Java, Maven ni Node localmente.
+
+```bash
+# 1. (Opcional) Configura tus variables de entorno
+cp .env.example .env      # edita el password si lo deseas
+
+# 2. Levanta el stack completo
+docker compose up -d
+
+# 3. Verifica
+docker compose ps
+```
+
+- **Frontend**: http://localhost:3000
+- **Backend (API)**: http://localhost:8080
+- **PostgreSQL**: localhost:5432 (BD `Sala_911`)
+
+Para detener y eliminar contenedores: `docker compose down` (los datos de la BD persisten en el volumen `pgdata`).
+Para borrar también la BD: `docker compose down -v`.
+
+> **Seguridad**: Las credenciales se toman de `.env` (ver `.env.example`). El archivo `.env` real **no** se sube al repo. En producción cambia `DB_PASSWORD` por un secreto fuerte y no reutilices la contraseña de desarrollo.
+
+---
+
+## 🚀 Cómo Ejecutar el Proyecto (desarrollo local, sin Docker)
+
+> Requiere: **Java 17+**, **Maven 3.x** (o usa `./mvnw` incluido), **Node 18+** con **`pnpm`** (`npm` prohibido por `AGENTS.md`).
+> La configuración de BD se lee de variables de entorno (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) con valores por defecto para desarrollo local.
 
 ### 1. Inicialización de Base de Datos PostgreSQL
 Asegúrese de tener PostgreSQL en ejecución en `localhost:5432` con la base de datos `Sala_911`:
@@ -20,16 +49,16 @@ CREATE DATABASE "Sala_911";
 *(Los scripts `schema.sql` y `data.sql` se ejecutarán automáticamente al iniciar el Backend)*.
 
 ### 2. Ejecución del Backend (Spring Boot)
-Navegar al directorio `/home/fabrica/Documentos/Reto_911/back`:
+Desde la raíz del repo:
 ```bash
 cd back
-mvn spring-boot:run
+./mvnw spring-boot:run      # o: mvn spring-boot:run
 ```
 - **Puerto**: `http://localhost:8080`
 - **Pruebas unitarias**: `mvn test`
 
 ### 3. Ejecución del Frontend (React con `pnpm`)
-Navegar al directorio `/home/fabrica/Documentos/Reto_911/Front/room911-frontend`:
+Desde la raíz del repo:
 ```bash
 cd Front/room911-frontend
 pnpm install

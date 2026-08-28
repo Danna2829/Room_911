@@ -1,0 +1,48 @@
+# Room_911 - Arranque con un comando
+# Uso:
+#   1. Copia .env.example a .env (opcional, ya hay valores por defecto)
+#   2. docker compose up -d
+#   3. Frontend: http://localhost:3000   Backend: http://localhost:8080
+
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-Sala_911}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fabrica2024*}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-Sala_911}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  back:
+    build: ./back
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_NAME: ${DB_NAME:-Sala_911}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-fabrica2024*}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  front:
+    build: ./Front/room911-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - back
+
+volumes:
+  pgdata:

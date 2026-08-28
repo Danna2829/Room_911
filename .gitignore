@@ -16,3 +16,11 @@ Thumbs.db
 node_modules/
 dist/
 build/
+
+# Environment secrets (keep .env.example tracked, ignore real .env)
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose.override.yml

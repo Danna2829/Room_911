@@ -128,3 +128,21 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 - **Estado del Sprint**: Corrección de Endpoints Frontend y Pruebas Superadas.
 
 *(Ver histórico anterior para entradas #001 a #008)*
+
+---
+
+## 📝 Entrada de Handoff #009
+
+- **Fecha**: 28 de Agosto de 2026
+- **Tema**: Conexión a GitHub + Infraestructura de ejecución (Docker / env / perfil).
+
+- **Qué se hizo**:
+  1. Inicializado repositorio Git local en `main` y conectado a `https://github.com/Danna2829/Room_911.git` (auth con cuenta `Danna2829`). Se conservó el README del proyecto frente al placeholder del remoto y se corrigió un repo embebido en `Front/room911-frontend` (no subía su código).
+  2. Externalizadas credenciales de BD a variables de entorno en `application.properties` (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) con valores por defecto de dev.
+  3. Creado perfil Spring `docker` (`application-docker.properties`) que apunta el datasource al host `db` de Docker.
+  4. Creados `.env.example` (rastreado) y `.env` (ignorado en `.gitignore`).
+  5. Creados `Dockerfile` + `.dockerignore` para `back` (Maven multi-stage) y `Front/room911-frontend` (pnpm), y `docker-compose.yml` con servicios `db` (postgres:15 + healthcheck), `back` y `front`.
+  6. README actualizado con guía de instalación rápida con Docker (un comando) y desarrollo local corregido (rutas relativas, `./mvnw`, `pnpm`).
+
+- **Cómo se hizo**: Edición directa de archivos, sin `npm`, validando YAML de compose y que `.env` quede ignorado.
+- **Qué sigue**: Probar `docker compose up -d` en la PC personal; añadir CI (GitHub Actions: `mvn test` + `pnpm build`) y considerar secretos externos para producción.
