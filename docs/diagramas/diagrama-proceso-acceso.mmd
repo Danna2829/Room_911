@@ -1,0 +1,16 @@
+flowchart TD
+    inicio([Inicio: ID + acción + medicamento]) --> registrado{¿Usuario registrado?}
+    registrado -- No --> noid[Denegar: ID no registrado]
+    registrado -- Sí --> activo{¿Permiso activo?}
+    activo -- No --> suspendido[Denegar: permiso suspendido]
+    activo -- Sí --> franja{¿Existe franja activa hoy y ahora?}
+    franja -- No --> fuera[Denegar: fuera de cronograma]
+    franja -- Sí --> perfil{¿Perfil permite el tipo?}
+    perfil -- No --> tipo[Denegar y asignar tarea alternativa]
+    perfil -- Sí --> permitir[Permitir entrada o salida]
+    noid --> registrar[Registrar trazabilidad en acceso]
+    suspendido --> registrar
+    fuera --> registrar
+    tipo --> registrar
+    permitir --> registrar
+    registrar --> fin([Fin: respuesta al torniquete])

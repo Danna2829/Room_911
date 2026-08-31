@@ -1,0 +1,22 @@
+flowchart LR
+    empleado([Empleado])
+    guardia([Guardia])
+    secretaria([Secretaría])
+    admin([Administrador])
+    identificar((Identificarse por ID interno))
+    evaluar((Evaluar acceso ABAC))
+    torniquete((Registrar entrada o salida))
+    consultar((Consultar resultado))
+    permisos((Activar o suspender permiso))
+    cronograma((Publicar cronograma))
+    auditoria((Consultar auditoría))
+    alternativa((Asignar tarea alternativa))
+    empleado --> identificar
+    empleado --> torniquete
+    empleado --> consultar
+    guardia --> permisos
+    guardia --> consultar
+    secretaria --> cronograma
+    admin --> auditoria
+    torniquete -. incluye .-> evaluar
+    evaluar -. si deniega .-> alternativa

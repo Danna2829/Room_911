@@ -1,0 +1,49 @@
+classDiagram
+    class Usuario {
+        +String idUsuario
+        +String nombre
+        +String apellido
+        +String rol
+        +boolean activo
+        +LocalDate suspendidoDesde
+        +LocalDate suspendidoHasta
+        +estaSuspendido(fecha)
+    }
+    class Perfil {
+        +Long id
+        +String nombre
+        +Integer nivel
+        +String tiposPermitidos
+        +permiteTipo(tipo)
+    }
+    class Medicamento {
+        +String id
+        +String nombre
+        +Integer tipo
+    }
+    class Cronograma {
+        +Long id
+        +String diaSemana
+        +LocalTime horaInicio
+        +LocalTime horaFin
+        +String actividad
+    }
+    class RegistroAcceso {
+        +Long id
+        +LocalDateTime fechaHora
+        +String accion
+        +String resultado
+        +String motivo
+        +String tareaAlternativa
+    }
+    class TareaAlternativa {
+        +Long id
+        +String nombre
+        +String descripcion
+        +boolean activa
+    }
+    Usuario "*" --> "1" Perfil : tiene
+    Cronograma "*" --> "1" Medicamento : programa
+    RegistroAcceso "*" --> "0..1" Usuario : identifica
+    RegistroAcceso "*" --> "0..1" Medicamento : evalua
+    RegistroAcceso "*" --> "0..1" TareaAlternativa : deriva

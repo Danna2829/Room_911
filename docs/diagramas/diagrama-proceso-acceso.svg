@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1050" viewBox="0 0 1400 1050">
+  <style>
+    .bg{fill:#f5f7fb}.box{fill:#fff;stroke:#2368c4;stroke-width:3}.decision{fill:#fff7df;stroke:#c18a1c;stroke-width:3}.deny{fill:#fff0f0;stroke:#c94854;stroke-width:3}.ok{fill:#e9f8f1;stroke:#168b61;stroke-width:3}.t{font:16px Arial;fill:#17212b}.h{font:bold 24px Arial;fill:#17212b}.s{font:13px Arial;fill:#5d6b7a}.arrow{stroke:#53687c;stroke-width:3;fill:none;marker-end:url(#a)}
+  </style>
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#53687c"/></marker></defs>
+  <rect width="1400" height="1050" class="bg"/><text x="50" y="55" class="h">Room_911 · Proceso de evaluación de acceso</text><text x="50" y="82" class="s">Flujo ejecutado por el motor ABAC antes de abrir el torniquete</text>
+  <rect x="500" y="115" width="400" height="58" rx="29" class="box"/><text x="700" y="151" text-anchor="middle" class="t">Inicio: ID + acción + medicamento</text>
+  <path d="M700 173V215" class="arrow"/>
+  <path d="M700 215l125 75-125 75-125-75z" class="decision"/><text x="700" y="286" text-anchor="middle" class="t">¿Usuario</text><text x="700" y="307" text-anchor="middle" class="t">registrado?</text>
+  <path d="M575 290H310" class="arrow"/><text x="440" y="278" class="s">No</text><rect x="80" y="260" width="230" height="60" rx="10" class="deny"/><text x="195" y="296" text-anchor="middle" class="t">Denegar: ID no registrado</text>
+  <path d="M700 365V420" class="arrow"/><text x="716" y="395" class="s">Sí</text>
+  <path d="M700 420l125 75-125 75-125-75z" class="decision"/><text x="700" y="491" text-anchor="middle" class="t">¿Permiso activo</text><text x="700" y="512" text-anchor="middle" class="t">en la fecha?</text>
+  <path d="M575 495H310" class="arrow"/><text x="440" y="483" class="s">No</text><rect x="80" y="465" width="230" height="60" rx="10" class="deny"/><text x="195" y="501" text-anchor="middle" class="t">Denegar: suspendido</text>
+  <path d="M700 570V625" class="arrow"/><text x="716" y="605" class="s">Sí</text>
+  <path d="M700 625l125 75-125 75-125-75z" class="decision"/><text x="700" y="696" text-anchor="middle" class="t">¿Franja activa</text><text x="700" y="717" text-anchor="middle" class="t">hoy y ahora?</text>
+  <path d="M575 700H310" class="arrow"/><text x="440" y="688" class="s">No</text><rect x="80" y="670" width="230" height="60" rx="10" class="deny"/><text x="195" y="706" text-anchor="middle" class="t">Denegar: fuera de horario</text>
+  <path d="M700 775V830" class="arrow"/><text x="716" y="810" class="s">Sí</text>
+  <path d="M700 830l125 75-125 75-125-75z" class="decision"/><text x="700" y="901" text-anchor="middle" class="t">¿Perfil permite</text><text x="700" y="922" text-anchor="middle" class="t">el tipo?</text>
+  <path d="M575 905H310" class="arrow"/><text x="440" y="893" class="s">No</text><rect x="60" y="865" width="250" height="80" rx="10" class="deny"/><text x="185" y="900" text-anchor="middle" class="t">Denegar + tarea</text><text x="185" y="922" text-anchor="middle" class="t">alternativa</text>
+  <path d="M825 905H1080" class="arrow"/><text x="950" y="893" class="s">Sí</text><rect x="1080" y="865" width="250" height="80" rx="10" class="ok"/><text x="1205" y="900" text-anchor="middle" class="t">Permitir entrada</text><text x="1205" y="922" text-anchor="middle" class="t">o salida</text>
+  <path d="M195 320V985H520" class="arrow"/><path d="M195 525V985H520" class="arrow"/><path d="M195 730V985H520" class="arrow"/><path d="M185 945V985H520" class="arrow"/><path d="M1205 945V985H880" class="arrow"/>
+  <rect x="520" y="965" width="360" height="58" rx="29" class="box"/><text x="700" y="1001" text-anchor="middle" class="t">Registrar trazabilidad y responder</text>
+</svg>

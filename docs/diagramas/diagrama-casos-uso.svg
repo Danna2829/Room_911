@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+  <style>
+    .bg{fill:#f5f7fb}.sys{fill:#fff;stroke:#1f6feb;stroke-width:3}.uc{fill:#eaf2ff;stroke:#1f6feb;stroke-width:2}.actor{fill:#17212b}.t{font:16px Arial;fill:#17212b}.h{font:bold 24px Arial;fill:#17212b}.s{font:13px Arial;fill:#5d6b7a}.line{stroke:#62758a;stroke-width:2;fill:none}.dash{stroke-dasharray:8 6}
+  </style>
+  <rect class="bg" width="1400" height="820"/>
+  <text x="50" y="55" class="h">Room_911 · Diagrama de casos de uso</text>
+  <text x="50" y="82" class="s">Sistema de control de acceso dinámico por matriz de riesgo y cronograma</text>
+  <rect x="300" y="115" width="850" height="630" rx="18" class="sys"/>
+  <text x="330" y="150" class="h" style="font-size:20px">Sistema Room_911</text>
+  <g class="t" text-anchor="middle">
+    <ellipse cx="520" cy="225" rx="145" ry="38" class="uc"/><text x="520" y="231">Identificarse por ID</text>
+    <ellipse cx="850" cy="225" rx="145" ry="38" class="uc"/><text x="850" y="231">Registrar entrada/salida</text>
+    <ellipse cx="520" cy="340" rx="145" ry="38" class="uc"/><text x="520" y="346">Consultar resultado</text>
+    <ellipse cx="850" cy="340" rx="145" ry="38" class="uc"/><text x="850" y="346">Evaluar matriz ABAC</text>
+    <ellipse cx="520" cy="455" rx="145" ry="38" class="uc"/><text x="520" y="461">Activar/suspender permiso</text>
+    <ellipse cx="850" cy="455" rx="145" ry="38" class="uc"/><text x="850" y="461">Publicar cronograma</text>
+    <ellipse cx="685" cy="580" rx="160" ry="38" class="uc"/><text x="685" y="586">Asignar tarea alternativa</text>
+    <ellipse cx="685" cy="675" rx="145" ry="38" class="uc"/><text x="685" y="681">Consultar auditoría</text>
+  </g>
+  <g class="t" text-anchor="middle">
+    <circle cx="130" cy="270" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M130 288v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="130" y="380">Empleado</text>
+    <circle cx="1270" cy="395" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M1270 413v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="1270" y="505">Guardia</text>
+    <circle cx="1270" cy="585" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M1270 603v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="1270" y="695">Secretaría</text>
+    <circle cx="130" cy="620" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M130 638v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="130" y="750">Administrador</text>
+  </g>
+  <path d="M175 270L375 225M175 290L705 225M175 310L375 340" class="line"/>
+  <path d="M1225 395L995 455M1225 415L995 340M1225 435L665 675" class="line"/>
+  <path d="M1225 585L995 455M1225 605L830 675M175 620L540 675" class="line"/>
+  <path d="M665 263L720 300M790 375L730 540" class="line dash"/>
+  <text x="730" y="292" class="s">&lt;&lt; incluye &gt;&gt;</text><text x="735" y="520" class="s">&lt;&lt; si deniega &gt;&gt;</text>
+</svg>

@@ -1,5 +1,7 @@
 # Modelo relacional
 
+Vista visual: [modelo relacional de Room_911](diagramas/modelo-relacional.svg).
+
 El script ejecutable es [`database/schema.sql`](../database/schema.sql). Las tablas cumplen los nombres solicitados.
 
 | Tabla | Clave primaria | Claves foráneas | Propósito |

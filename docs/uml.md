@@ -1,5 +1,13 @@
 # Diagramas UML
 
+Las vistas visuales están disponibles en la carpeta [`docs/diagramas`](diagramas/README.md):
+
+- [Diagrama de casos de uso](diagramas/diagrama-casos-uso.svg)
+- [Diagrama de proceso de acceso](diagramas/diagrama-proceso-acceso.svg)
+- [Diagrama de clases](diagramas/diagrama-clases.svg)
+
+Los archivos `.mmd` de esa carpeta son las fuentes editables para Mermaid.
+
 Los diagramas están expresados en Mermaid para poder versionarlos y renderizarlos en GitHub, Mermaid Live o cualquier visor compatible.
 
 ## Casos de uso
@@ -58,7 +66,7 @@ classDiagram
  class TareaAlternativa { +Long id +String nombre +String descripcion +boolean activa }
  Usuario "*" --> "1" Perfil : tiene
  Cronograma "*" --> "1" Medicamento : programa
- Acceso "*" --> "1" Usuario : pertenece
+ Acceso "*" --> "0..1" Usuario : identifica
  Acceso "*" --> "0..1" Medicamento : evalua
  Acceso "0..*" --> "0..1" TareaAlternativa : deriva en
 ```

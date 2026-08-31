@@ -48,6 +48,7 @@ pnpm verificar
 - [Historias de usuario](docs/historias-usuario.md)
 - [Mockups](docs/mockups.md)
 - [Diagramas UML](docs/uml.md)
+- [Diagramas visuales SVG](docs/diagramas/README.md)
 - [Modelo relacional](docs/modelo-relacional.md)
 - [API y reglas de negocio](docs/api.md)
 - [Mockup visual](docs/mockups/mockups-room-911.svg)
