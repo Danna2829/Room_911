@@ -24,7 +24,7 @@
 
 - Ejecutar `pnpm instalar`, `pnpm db:up` y `pnpm verificar` en el entorno final.
 - Autenticar GitHub con la cuenta `Danna2829`, inicializar el repositorio raíz y hacer push al remoto solicitado.
-- El remoto fue verificado y existe en `main`; la raíz local entregada no trae un historial Git utilizable, por lo que la publicación requiere crear el commit raíz o aplicar estos cambios sobre la estructura que se decida conservar.
+- El remoto fue verificado y existe en `main`; como su estructura ya contenía otra línea de desarrollo, la entrega se publicó sin sobrescribirla en la rama `codex/entrega-room-911`, commit `0bb26be`. Crear un Pull Request hacia `main` es el siguiente paso de integración.
 - Revisar los datos de demo y reemplazar correos de prueba.
 
 ## Siguiente sesión recomendada
