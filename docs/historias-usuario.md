@@ -35,7 +35,7 @@ Este documento conserva la plantilla entregada: código, nombre, complejidad, hi
 
 ## HU-003 — Registrar usuario
 
-**Complejidad:** Alta · **HU relacionada:** HU-001, HU-005 · **Módulo:** Gestionar_usuarios · **CU:** CU003 · **Estado:** API implementada / pantalla pendiente
+**Complejidad:** Alta · **HU relacionada:** HU-001, HU-005 · **Módulo:** Gestionar_usuarios · **CU:** CU003 · **Estado:** Implementada
 
 **Descripción:** Como **administrador**, quiero **registrar un usuario con rol y perfil**, para **asignarle permisos controlados dentro de Room_911**.
 
@@ -52,7 +52,7 @@ Este documento conserva la plantilla entregada: código, nombre, complejidad, hi
 
 ## HU-004 — Consultar usuario
 
-**Complejidad:** Media · **HU relacionada:** HU-001 · **Módulo:** Gestionar_usuarios · **CU:** CU004 · **Estado:** API implementada / vista pendiente
+**Complejidad:** Media · **HU relacionada:** HU-001 · **Módulo:** Gestionar_usuarios · **CU:** CU004 · **Estado:** Implementada
 
 **Descripción:** Como **administrador o guardia de seguridad**, quiero **consultar usuarios y su estado**, para **verificar quién puede solicitar acceso**.
 
@@ -64,7 +64,7 @@ Este documento conserva la plantilla entregada: código, nombre, complejidad, hi
 
 ## HU-005 — Asignar rol y perfil de riesgo
 
-**Complejidad:** Alta · **HU relacionada:** HU-003 · **Módulo:** Gestionar_permisos_accesos · **CU:** CU001 y CU005 · **Estado:** Modelo y API disponibles
+**Complejidad:** Alta · **HU relacionada:** HU-003 · **Módulo:** Gestionar_permisos_accesos · **CU:** CU001 y CU005 · **Estado:** Implementada
 
 **Descripción:** Como **administrador**, quiero **asignar un rol y un perfil de nivel de riesgo**, para **determinar qué tipos de medicamento puede manipular una persona**.
 
@@ -136,7 +136,7 @@ Este documento conserva la plantilla entregada: código, nombre, complejidad, hi
 
 ## HU-011 — Crear, editar y consultar cronograma
 
-**Complejidad:** Alta · **HU relacionada:** HU-008, HU-010 · **Módulo:** Gestionar_cronograma · **CU:** CU001, CU002, CU003 · **Estado:** API implementada / vista principal disponible
+**Complejidad:** Alta · **HU relacionada:** HU-008, HU-010 · **Módulo:** Gestionar_cronograma · **CU:** CU001, CU002, CU003 · **Estado:** API y vista principal implementadas
 
 **Descripción:** Como **secretaría**, quiero **publicar medicamento, día, franja y actividad**, para **definir el contexto operativo que usa la matriz ABAC**.
 

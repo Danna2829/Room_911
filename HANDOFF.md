@@ -16,6 +16,8 @@
 - Agregadas tres pruebas unitarias del motor ABAC para acceso permitido, tipo no autorizado con tarea alternativa y usuario suspendido.
 - Agregada actualización `PUT /api/cronogramas/{id}` para completar el mantenimiento de franjas.
 - Agregados filtros de auditoría, exportación CSV y pantalla de historial en el frontend.
+- Agregada pantalla frontend de usuarios para registro, consulta y asignación de perfil; agregado `GET /api/perfiles`.
+- Agregados filtros visuales de auditoría por ID de usuario y medicamento.
 - Los filtros ahora se ejecutan mediante consulta parametrizada en PostgreSQL para resultado, acción, usuario, medicamento y rango de fechas.
 - Agregado índice para `acceso.resultado`; la exportación CSV reutiliza los mismos filtros del backend.
 
@@ -23,8 +25,7 @@
 
 - Integrar un proveedor real de identidad interna o lector físico; la identificación actual es deliberadamente una simulación del reto.
 - Añadir autorización por sesión/token para producción. Actualmente los endpoints son públicos porque el reto pide login sin contraseña.
-- Añadir exportación PDF y filtros visuales por usuario, medicamento y fechas en auditoría.
-- Completar las pantallas administrativas de registro, consulta y asignación de perfiles si se exige el alcance ampliado de los mockups originales.
+- Añadir exportación PDF y filtros visuales por rango de fechas en auditoría.
 - Incorporar pruebas de integración con PostgreSQL y más pruebas de componentes del frontend.
 - Definir una política formal de retención de logs y endurecer CORS antes de publicar en producción.
 

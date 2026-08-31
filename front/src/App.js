@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { identificarUsuario } from "./servicios/ServicioApi";
 import Aplicacion911 from "./componentes/Aplicacion911";
 import "./estilos/aplicacion.css";
+import "./estilos/filtros.css";
 
 export default function App() {
   const [usuario, setUsuario] = useState(() => { try { return JSON.parse(localStorage.getItem("room911_usuario")) || null; } catch { return null; } });

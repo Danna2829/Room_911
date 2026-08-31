@@ -14,6 +14,9 @@ El proyecto tenía una pantalla administrativa genérica, autenticación por ID 
 - Se agregó registro de permitidos, denegados, motivo y tarea alternativa.
 - Se agregaron endpoints REST de identidad, agenda, catálogo, evaluación y auditoría.
 - Se reemplazó la experiencia React por login, resumen, guardia, secretaría y simulador.
+- Se agregó gestión frontend de usuarios: registro, consulta y asignación de perfil sin contraseña.
+- Se agregó `GET /api/perfiles` y resolución segura del perfil existente al guardar un usuario.
+- Se ampliaron los filtros visibles y exportables de auditoría por ID de usuario y medicamento.
 - Se agregaron historias de usuario, mockup SVG, diagramas UML Mermaid, modelo relacional, API, reglas, agenda y handoff.
 
 ## Verificación realizada

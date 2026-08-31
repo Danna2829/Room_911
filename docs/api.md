@@ -7,6 +7,8 @@ Base URL: `http://localhost:8080/api`.
 | GET | `/salud` | Verificar disponibilidad. |
 | POST | `/usuarios/identificar` | Identificar por `{ "idUsuario": "EMP-301" }`; devuelve rol y nivel. |
 | GET | `/usuarios` | Listar perfiles operativos. |
+| GET | `/perfiles` | Listar perfiles de riesgo para asignación administrativa. |
+| POST | `/usuarios` | Registrar usuario con `perfil: { "id": 1 }`; no usa contraseña. |
 | PATCH | `/usuarios/{id}/estado?activo=false&desde=2026-08-31&hasta=2026-09-02` | Activar/suspender. |
 | GET | `/medicamentos` | Catálogo. |
 | GET | `/cronogramas` | Agenda publicada. |

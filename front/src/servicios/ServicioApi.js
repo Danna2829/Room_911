@@ -2,6 +2,8 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 async function pedir(ruta, opciones = {}) { const respuesta = await fetch(`${API_URL}${ruta}`, { headers: { "Content-Type": "application/json", ...(opciones.headers || {}) }, ...opciones }); const texto = await respuesta.text(); let datos = {}; try { datos = texto ? JSON.parse(texto) : {}; } catch { datos = {}; } if (!respuesta.ok) throw new Error(datos.mensaje || "No fue posible completar la solicitud."); return datos; }
 export const identificarUsuario = idUsuario => pedir("/usuarios/identificar", { method: "POST", body: JSON.stringify({ idUsuario }) });
 export const listarUsuarios = () => pedir("/usuarios");
+export const listarPerfiles = () => pedir("/perfiles");
+export const crearUsuario = datos => pedir("/usuarios", { method: "POST", body: JSON.stringify(datos) });
 export const cambiarEstadoUsuario = (id, activo, desde = "", hasta = "") => pedir(`/usuarios/${id}/estado?activo=${activo}${desde ? `&desde=${desde}` : ""}${hasta ? `&hasta=${hasta}` : ""}`, { method: "PATCH" });
 export const listarCronogramas = () => pedir("/cronogramas");
 export const listarMedicamentos = () => pedir("/medicamentos");
