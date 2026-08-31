@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: room-911-postgres
+    environment:
+      POSTGRES_DB: room_911
+      POSTGRES_USER: room911
+      POSTGRES_PASSWORD: room911_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - room_911_pgdata:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seeds.sql:/docker-entrypoint-initdb.d/02-seeds.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U room911 -d room_911"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  room_911_pgdata:

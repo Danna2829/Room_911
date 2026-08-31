@@ -1,0 +1,17 @@
+# Dependencias y compilados
+front/node_modules/
+front/build/
+back/Sala_911/target/
+node_modules/
+
+# Entorno local
+.env
+.env.*
+!.env.example
+.idea/
+*.iml
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
