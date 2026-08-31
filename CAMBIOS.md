@@ -17,6 +17,8 @@ El proyecto tenía una pantalla administrativa genérica, autenticación por ID 
 - Se agregó gestión frontend de usuarios: registro, consulta y asignación de perfil sin contraseña.
 - Se agregó `GET /api/perfiles` y resolución segura del perfil existente al guardar un usuario.
 - Se ampliaron los filtros visibles y exportables de auditoría por ID de usuario y medicamento.
+- Se agregaron filtros por rango de fechas y exportación PDF mediante impresión del reporte filtrado.
+- Se agregó una prueba de integración web con Spring Boot, JPA y H2.
 - Se agregaron historias de usuario, mockup SVG, diagramas UML Mermaid, modelo relacional, API, reglas, agenda y handoff.
 
 ## Verificación realizada

@@ -34,6 +34,8 @@ Base URL: `http://localhost:8080/api`.
 
 El campo `fechaHora` es opcional; omitirlo usa la hora del servidor. La respuesta devuelve `permitido`, `resultado`, `motivo`, `tareaAlternativa`, medicamento y timestamp.
 
+La pantalla de auditoría también permite imprimir el resultado filtrado como PDF desde el diálogo nativo del navegador (`Exportar PDF`).
+
 ## Matriz de decisión
 
 1. El ID debe existir.

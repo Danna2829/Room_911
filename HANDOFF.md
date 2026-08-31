@@ -18,6 +18,8 @@
 - Agregados filtros de auditoría, exportación CSV y pantalla de historial en el frontend.
 - Agregada pantalla frontend de usuarios para registro, consulta y asignación de perfil; agregado `GET /api/perfiles`.
 - Agregados filtros visuales de auditoría por ID de usuario y medicamento.
+- Agregados filtros visuales por fecha desde/hasta y exportación PDF mediante impresión del reporte filtrado.
+- Agregada prueba de integración web con Spring Boot, JPA y H2 para validar el endpoint de salud.
 - Los filtros ahora se ejecutan mediante consulta parametrizada en PostgreSQL para resultado, acción, usuario, medicamento y rango de fechas.
 - Agregado índice para `acceso.resultado`; la exportación CSV reutiliza los mismos filtros del backend.
 
@@ -25,13 +27,12 @@
 
 - Integrar un proveedor real de identidad interna o lector físico; la identificación actual es deliberadamente una simulación del reto.
 - Añadir autorización por sesión/token para producción. Actualmente los endpoints son públicos porque el reto pide login sin contraseña.
-- Añadir exportación PDF y filtros visuales por rango de fechas en auditoría.
 - Incorporar pruebas de integración con PostgreSQL y más pruebas de componentes del frontend.
 - Definir una política formal de retención de logs y endurecer CORS antes de publicar en producción.
 
 ## Pendiente operativo
 
-- Ejecutar `pnpm instalar`, `pnpm db:up` y `pnpm verificar` en el entorno final.
+- Ejecutar `pnpm instalar`, `pnpm db:up` y `pnpm verificar` en el entorno final; el test local de integración usa H2 y aún falta la comprobación con PostgreSQL real.
 - El remoto fue verificado y existe en `main`; como su estructura ya contenía otra línea de desarrollo, la entrega se publicó sin sobrescribirla en la rama `codex/entrega-room-911`. Los cambios nuevos de filtros deben publicarse en esa rama y luego integrarse mediante Pull Request.
 - Revisar los datos de demo y reemplazar correos de prueba.
 
