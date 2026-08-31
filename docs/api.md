@@ -11,6 +11,7 @@ Base URL: `http://localhost:8080/api`.
 | GET | `/medicamentos` | Catálogo. |
 | GET | `/cronogramas` | Agenda publicada. |
 | POST | `/cronogramas` | Crear `{diaSemana,horaInicio,horaFin,medicamentoId,actividad}`. |
+| PUT | `/cronogramas/{id}` | Actualizar una franja publicada con el mismo payload. |
 | POST | `/accesos/evaluar` | Ejecutar el motor y registrar el intento. |
 | GET | `/accesos` | Auditoría ordenada desde el más reciente. |
 | GET | `/accesos/usuario/{id}` | Auditoría de una persona. |

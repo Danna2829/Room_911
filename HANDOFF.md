@@ -11,20 +11,21 @@
 - Rediseñado el frontend con login, resumen, panel de guardia, agenda de secretaría y simulador de torniquete.
 - Agregados mockup SVG, historias de usuario, UML, modelo relacional, API, reglas, guía y plan de estudio.
 - Agregado Docker Compose para inicializar PostgreSQL con semillas demo.
+- Agregadas tres pruebas unitarias del motor ABAC para acceso permitido, tipo no autorizado con tarea alternativa y usuario suspendido.
+- Agregada actualización `PUT /api/cronogramas/{id}` para completar el mantenimiento de franjas.
 
 ## Pendiente de producto
 
 - Integrar un proveedor real de identidad interna o lector físico; la identificación actual es deliberadamente una simulación del reto.
 - Añadir autorización por sesión/token para producción. Actualmente los endpoints son públicos porque el reto pide login sin contraseña.
-- Añadir edición y eliminación de franjas, exportación CSV/PDF y filtros avanzados de auditoría.
-- Incorporar pruebas de integración con PostgreSQL y pruebas de componentes del frontend.
+- Añadir exportación CSV/PDF y filtros avanzados de auditoría.
+- Incorporar pruebas de integración con PostgreSQL y más pruebas de componentes del frontend.
 - Definir una política formal de retención de logs y endurecer CORS antes de publicar en producción.
 
 ## Pendiente operativo
 
 - Ejecutar `pnpm instalar`, `pnpm db:up` y `pnpm verificar` en el entorno final.
-- Autenticar GitHub con la cuenta `Danna2829`, inicializar el repositorio raíz y hacer push al remoto solicitado.
-- El remoto fue verificado y existe en `main`; como su estructura ya contenía otra línea de desarrollo, la entrega se publicó sin sobrescribirla en la rama `codex/entrega-room-911`, commit `0bb26be`. Crear un Pull Request hacia `main` es el siguiente paso de integración.
+- El remoto fue verificado y existe en `main`; como su estructura ya contenía otra línea de desarrollo, la entrega se publicó sin sobrescribirla en la rama `codex/entrega-room-911`. Los cambios actuales deben volver a publicarse en esa rama y luego integrarse mediante Pull Request.
 - Revisar los datos de demo y reemplazar correos de prueba.
 
 ## Siguiente sesión recomendada
