@@ -12,7 +12,7 @@ Base URL: `http://localhost:8080/api`.
 | GET | `/cronogramas` | Agenda publicada. |
 | POST | `/cronogramas` | Crear `{diaSemana,horaInicio,horaFin,medicamentoId,actividad}`. |
 | PUT | `/cronogramas/{id}` | Actualizar una franja publicada con el mismo payload. |
-| GET | `/accesos/filtrar?resultado=DENEGADO&idUsuario=EMP-301&desde=2026-08-31&hasta=2026-09-01` | Filtrar auditoría por resultado, usuario y rango de fechas. |
+| GET | `/accesos/filtrar?resultado=DENEGADO&accion=ENTRADA&idUsuario=EMP-301&medicamentoId=M003&desde=2026-08-31&hasta=2026-09-01` | Filtrar auditoría por resultado, acción, usuario, medicamento y rango de fechas. |
 | GET | `/accesos/exportar.csv` | Descargar la auditoría en CSV; acepta los mismos filtros. |
 | POST | `/accesos/evaluar` | Ejecutar el motor y registrar el intento. |
 | GET | `/accesos` | Auditoría ordenada desde el más reciente. |

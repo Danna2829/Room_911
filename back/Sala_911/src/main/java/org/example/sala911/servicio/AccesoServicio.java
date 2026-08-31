@@ -35,17 +35,18 @@ public class AccesoServicio {
     private String normalizar(String s){return Normalizer.normalize(s==null?"":s,Normalizer.Form.NFD).replaceAll("\\p{M}","").toLowerCase(Locale.ROOT);}
     public List<RegistroAcceso> todos(){return accesos.findAllByOrderByFechaHoraDesc();}
     public List<RegistroAcceso> porUsuario(String id){return accesos.findByUsuarioIdUsuarioOrderByFechaHoraDesc(id);}
-    public List<RegistroAcceso> filtrar(String resultado,String idUsuario,LocalDate desde,LocalDate hasta){
-        return accesos.filtrar(resultado==null||resultado.isBlank()?null:resultado,idUsuario==null||idUsuario.isBlank()?null:idUsuario,desde==null?null:desde.atStartOfDay(),hasta==null?null:hasta.plusDays(1).atStartOfDay());
+    public List<RegistroAcceso> filtrar(String resultado,String accion,String idUsuario,String medicamentoId,LocalDate desde,LocalDate hasta){
+        return accesos.filtrar(vacio(resultado),vacio(accion),vacio(idUsuario),vacio(medicamentoId),desde==null?null:desde.atStartOfDay(),hasta==null?null:hasta.plusDays(1).atStartOfDay());
     }
-    public String csv(String resultado,String idUsuario,LocalDate desde,LocalDate hasta){
+    public String csv(String resultado,String accion,String idUsuario,String medicamentoId,LocalDate desde,LocalDate hasta){
         StringBuilder csv=new StringBuilder("fecha_hora,id_usuario,accion,resultado,medicamento,motivo,tarea_alternativa\n");
-        for(RegistroAcceso a:filtrar(resultado,idUsuario,desde,hasta)){
+        for(RegistroAcceso a:filtrar(resultado,accion,idUsuario,medicamentoId,desde,hasta)){
             csv.append(campo(a.getFechaHora())).append(',').append(campo(a.getUsuario()==null?"DESCONOCIDO":a.getUsuario().getIdUsuario())).append(',')
                     .append(campo(a.getAccion())).append(',').append(campo(a.getResultado())).append(',').append(campo(a.getMedicamentoId())).append(',')
                     .append(campo(a.getMotivo())).append(',').append(campo(a.getTareaAlternativa())).append('\n');
         }
         return csv.toString();
     }
+    private String vacio(String valor){return valor==null||valor.isBlank()?null:valor;}
     private String campo(Object valor){String texto=valor==null?"":String.valueOf(valor).replace("\"","\"\"");return "\""+texto+"\"";}
 }

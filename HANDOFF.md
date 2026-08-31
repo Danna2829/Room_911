@@ -14,20 +14,21 @@
 - Agregadas tres pruebas unitarias del motor ABAC para acceso permitido, tipo no autorizado con tarea alternativa y usuario suspendido.
 - Agregada actualización `PUT /api/cronogramas/{id}` para completar el mantenimiento de franjas.
 - Agregados filtros de auditoría, exportación CSV y pantalla de historial en el frontend.
-- Los filtros ahora se ejecutan mediante consulta parametrizada en PostgreSQL y se agregó índice para `acceso.resultado`.
+- Los filtros ahora se ejecutan mediante consulta parametrizada en PostgreSQL para resultado, acción, usuario, medicamento y rango de fechas.
+- Agregado índice para `acceso.resultado`; la exportación CSV reutiliza los mismos filtros del backend.
 
 ## Pendiente de producto
 
 - Integrar un proveedor real de identidad interna o lector físico; la identificación actual es deliberadamente una simulación del reto.
 - Añadir autorización por sesión/token para producción. Actualmente los endpoints son públicos porque el reto pide login sin contraseña.
-- Añadir exportación PDF y filtros avanzados por medicamento/acción en auditoría.
+- Añadir exportación PDF y filtros visuales por usuario, medicamento y fechas en auditoría.
 - Incorporar pruebas de integración con PostgreSQL y más pruebas de componentes del frontend.
 - Definir una política formal de retención de logs y endurecer CORS antes de publicar en producción.
 
 ## Pendiente operativo
 
 - Ejecutar `pnpm instalar`, `pnpm db:up` y `pnpm verificar` en el entorno final.
-- El remoto fue verificado y existe en `main`; como su estructura ya contenía otra línea de desarrollo, la entrega se publicó sin sobrescribirla en la rama `codex/entrega-room-911`. Los cambios actuales deben volver a publicarse en esa rama y luego integrarse mediante Pull Request.
+- El remoto fue verificado y existe en `main`; como su estructura ya contenía otra línea de desarrollo, la entrega se publicó sin sobrescribirla en la rama `codex/entrega-room-911`. Los cambios nuevos de filtros deben publicarse en esa rama y luego integrarse mediante Pull Request.
 - Revisar los datos de demo y reemplazar correos de prueba.
 
 ## Siguiente sesión recomendada
@@ -35,4 +36,4 @@
 1. Levantar la base y ejecutar la aplicación siguiendo `GUIA_INSTALACION.md`.
 2. Probar los cinco casos de `AGENDA.md`.
 3. Corregir los pendientes de producto según el alcance académico.
-4. Hacer commit y publicar el repositorio.
+4. Hacer merge de `codex/entrega-room-911` mediante el Pull Request generado.
