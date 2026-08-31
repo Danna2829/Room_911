@@ -50,6 +50,7 @@ pnpm verificar
 - [Diagramas UML](docs/uml.md)
 - [Modelo relacional](docs/modelo-relacional.md)
 - [API y reglas de negocio](docs/api.md)
+- [Mockup visual](docs/mockups/mockups-room-911.svg)
 - [Agenda de estudio](AGENDA.md)
 - [Handoff](HANDOFF.md)
 

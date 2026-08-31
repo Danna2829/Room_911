@@ -13,12 +13,13 @@
 - Agregado Docker Compose para inicializar PostgreSQL con semillas demo.
 - Agregadas tres pruebas unitarias del motor ABAC para acceso permitido, tipo no autorizado con tarea alternativa y usuario suspendido.
 - Agregada actualización `PUT /api/cronogramas/{id}` para completar el mantenimiento de franjas.
+- Agregados filtros de auditoría, exportación CSV y pantalla de historial en el frontend.
 
 ## Pendiente de producto
 
 - Integrar un proveedor real de identidad interna o lector físico; la identificación actual es deliberadamente una simulación del reto.
 - Añadir autorización por sesión/token para producción. Actualmente los endpoints son públicos porque el reto pide login sin contraseña.
-- Añadir exportación CSV/PDF y filtros avanzados de auditoría.
+- Añadir exportación PDF y filtros avanzados por medicamento/acción en auditoría.
 - Incorporar pruebas de integración con PostgreSQL y más pruebas de componentes del frontend.
 - Definir una política formal de retención de logs y endurecer CORS antes de publicar en producción.
 

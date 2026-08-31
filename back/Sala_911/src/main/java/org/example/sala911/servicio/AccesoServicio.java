@@ -35,4 +35,20 @@ public class AccesoServicio {
     private String normalizar(String s){return Normalizer.normalize(s==null?"":s,Normalizer.Form.NFD).replaceAll("\\p{M}","").toLowerCase(Locale.ROOT);}
     public List<RegistroAcceso> todos(){return accesos.findAllByOrderByFechaHoraDesc();}
     public List<RegistroAcceso> porUsuario(String id){return accesos.findByUsuarioIdUsuarioOrderByFechaHoraDesc(id);}
+    public List<RegistroAcceso> filtrar(String resultado,String idUsuario,LocalDate desde,LocalDate hasta){
+        return todos().stream().filter(a -> resultado==null || resultado.isBlank() || resultado.equalsIgnoreCase(a.getResultado()))
+                .filter(a -> idUsuario==null || idUsuario.isBlank() || (a.getUsuario()!=null && idUsuario.equalsIgnoreCase(a.getUsuario().getIdUsuario())))
+                .filter(a -> desde==null || !a.getFechaHora().toLocalDate().isBefore(desde))
+                .filter(a -> hasta==null || !a.getFechaHora().toLocalDate().isAfter(hasta)).toList();
+    }
+    public String csv(String resultado,String idUsuario,LocalDate desde,LocalDate hasta){
+        StringBuilder csv=new StringBuilder("fecha_hora,id_usuario,accion,resultado,medicamento,motivo,tarea_alternativa\n");
+        for(RegistroAcceso a:filtrar(resultado,idUsuario,desde,hasta)){
+            csv.append(campo(a.getFechaHora())).append(',').append(campo(a.getUsuario()==null?"DESCONOCIDO":a.getUsuario().getIdUsuario())).append(',')
+                    .append(campo(a.getAccion())).append(',').append(campo(a.getResultado())).append(',').append(campo(a.getMedicamentoId())).append(',')
+                    .append(campo(a.getMotivo())).append(',').append(campo(a.getTareaAlternativa())).append('\n');
+        }
+        return csv.toString();
+    }
+    private String campo(Object valor){String texto=valor==null?"":String.valueOf(valor).replace("\"","\"\"");return "\""+texto+"\"";}
 }

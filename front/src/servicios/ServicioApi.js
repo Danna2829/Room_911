@@ -8,3 +8,4 @@ export const listarMedicamentos = () => pedir("/medicamentos");
 export const crearCronograma = datos => pedir("/cronogramas", { method: "POST", body: JSON.stringify(datos) });
 export const evaluarAcceso = datos => pedir("/accesos/evaluar", { method: "POST", body: JSON.stringify(datos) });
 export const listarAccesos = () => pedir("/accesos");
+export const exportarAccesos = async () => { const respuesta = await fetch(`${API_URL}/accesos/exportar.csv`); if (!respuesta.ok) throw new Error("No fue posible exportar la auditoría."); return respuesta.blob(); };
