@@ -10,6 +10,8 @@
 - Implementados endpoints de identificación, estado de usuario, cronograma, catálogo, evaluación y auditoría.
 - Rediseñado el frontend con login, resumen, panel de guardia, agenda de secretaría y simulador de torniquete.
 - Agregados mockup SVG, historias de usuario, UML, modelo relacional, API, reglas, guía y plan de estudio.
+- Reestructurados los diagramas con la nomenclatura de la documentación original: módulos, actores `ADMINISTRADOR`, `GUARDIA_SEGURIDAD`, `OPERARIO`, `SECRETARÍA`, casos `CUxxx` y relaciones `include/extend`.
+- Reescritas las historias de usuario con la plantilla original completa y agregada matriz de trazabilidad entre HU, CU, API y tablas.
 - Agregado Docker Compose para inicializar PostgreSQL con semillas demo.
 - Agregadas tres pruebas unitarias del motor ABAC para acceso permitido, tipo no autorizado con tarea alternativa y usuario suspendido.
 - Agregada actualización `PUT /api/cronogramas/{id}` para completar el mantenimiento de franjas.
@@ -22,6 +24,7 @@
 - Integrar un proveedor real de identidad interna o lector físico; la identificación actual es deliberadamente una simulación del reto.
 - Añadir autorización por sesión/token para producción. Actualmente los endpoints son públicos porque el reto pide login sin contraseña.
 - Añadir exportación PDF y filtros visuales por usuario, medicamento y fechas en auditoría.
+- Completar las pantallas administrativas de registro, consulta y asignación de perfiles si se exige el alcance ampliado de los mockups originales.
 - Incorporar pruebas de integración con PostgreSQL y más pruebas de componentes del frontend.
 - Definir una política formal de retención de logs y endurecer CORS antes de publicar en producción.
 

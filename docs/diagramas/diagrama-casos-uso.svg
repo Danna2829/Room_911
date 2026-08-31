@@ -1,31 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1420" viewBox="0 0 1800 1420">
   <style>
-    .bg{fill:#f5f7fb}.sys{fill:#fff;stroke:#1f6feb;stroke-width:3}.uc{fill:#eaf2ff;stroke:#1f6feb;stroke-width:2}.actor{fill:#17212b}.t{font:16px Arial;fill:#17212b}.h{font:bold 24px Arial;fill:#17212b}.s{font:13px Arial;fill:#5d6b7a}.line{stroke:#62758a;stroke-width:2;fill:none}.dash{stroke-dasharray:8 6}
+    .bg{fill:#111827}.sys{fill:#17212b;stroke:#6b7280;stroke-width:2;stroke-dasharray:9 7}.uc{fill:#718096;stroke:#cbd5e1;stroke-width:1.5}.actor{fill:#253244;stroke:#d1d5db;stroke-width:1.5}.t{font:14px Arial;fill:#f8fafc}.small{font:12px Arial;fill:#cbd5e1}.title{font:bold 27px Arial;fill:#f8fafc}.module{font:bold 18px Arial;fill:#f8fafc}.line{stroke:#cbd5e1;stroke-width:2;fill:none}.dash{stroke:#d1d5db;stroke-width:1.5;stroke-dasharray:6 5;fill:none}
   </style>
-  <rect class="bg" width="1400" height="820"/>
-  <text x="50" y="55" class="h">Room_911 · Diagrama de casos de uso</text>
-  <text x="50" y="82" class="s">Sistema de control de acceso dinámico por matriz de riesgo y cronograma</text>
-  <rect x="300" y="115" width="850" height="630" rx="18" class="sys"/>
-  <text x="330" y="150" class="h" style="font-size:20px">Sistema Room_911</text>
-  <g class="t" text-anchor="middle">
-    <ellipse cx="520" cy="225" rx="145" ry="38" class="uc"/><text x="520" y="231">Identificarse por ID</text>
-    <ellipse cx="850" cy="225" rx="145" ry="38" class="uc"/><text x="850" y="231">Registrar entrada/salida</text>
-    <ellipse cx="520" cy="340" rx="145" ry="38" class="uc"/><text x="520" y="346">Consultar resultado</text>
-    <ellipse cx="850" cy="340" rx="145" ry="38" class="uc"/><text x="850" y="346">Evaluar matriz ABAC</text>
-    <ellipse cx="520" cy="455" rx="145" ry="38" class="uc"/><text x="520" y="461">Activar/suspender permiso</text>
-    <ellipse cx="850" cy="455" rx="145" ry="38" class="uc"/><text x="850" y="461">Publicar cronograma</text>
-    <ellipse cx="685" cy="580" rx="160" ry="38" class="uc"/><text x="685" y="586">Asignar tarea alternativa</text>
-    <ellipse cx="685" cy="675" rx="145" ry="38" class="uc"/><text x="685" y="681">Consultar auditoría</text>
-  </g>
-  <g class="t" text-anchor="middle">
-    <circle cx="130" cy="270" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M130 288v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="130" y="380">Empleado</text>
-    <circle cx="1270" cy="395" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M1270 413v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="1270" y="505">Guardia</text>
-    <circle cx="1270" cy="585" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M1270 603v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="1270" y="695">Secretaría</text>
-    <circle cx="130" cy="620" r="18" fill="none" stroke="#17212b" stroke-width="3"/><path d="M130 638v48m-30 0h60m-48-22l-25 35m73-35l25 35" class="line"/><text x="130" y="750">Administrador</text>
-  </g>
-  <path d="M175 270L375 225M175 290L705 225M175 310L375 340" class="line"/>
-  <path d="M1225 395L995 455M1225 415L995 340M1225 435L665 675" class="line"/>
-  <path d="M1225 585L995 455M1225 605L830 675M175 620L540 675" class="line"/>
-  <path d="M665 263L720 300M790 375L730 540" class="line dash"/>
-  <text x="730" y="292" class="s">&lt;&lt; incluye &gt;&gt;</text><text x="735" y="520" class="s">&lt;&lt; si deniega &gt;&gt;</text>
+  <rect width="1800" height="1420" class="bg"/><text x="50" y="52" class="title">Room_911 · Diagrama general de casos de uso</text><text x="50" y="80" class="small">Estructura basada en la documentación original: módulos, actores y nomenclatura CU por módulo.</text>
+  <rect x="35" y="110" width="850" height="560" rx="16" class="sys"/><text x="60" y="145" class="module">Sistema Room_911 · Gestionar_usuarios</text>
+  <g class="actor"><rect x="60" y="205" width="160" height="42" rx="8"/><rect x="60" y="330" width="160" height="42" rx="8"/><rect x="60" y="455" width="160" height="42" rx="8"/></g><g class="t" text-anchor="middle"><text x="140" y="232">ADMINISTRADOR</text><text x="140" y="357">GUARDIA_SEGURIDAD</text><text x="140" y="482">OPERARIO</text></g>
+  <g class="uc" text-anchor="middle"><ellipse cx="400" cy="205" rx="140" ry="32"/><ellipse cx="700" cy="205" rx="140" ry="32"/><ellipse cx="400" cy="300" rx="140" ry="32"/><ellipse cx="700" cy="300" rx="140" ry="32"/><ellipse cx="400" cy="395" rx="140" ry="32"/><ellipse cx="700" cy="395" rx="140" ry="32"/><ellipse cx="400" cy="490" rx="140" ry="32"/><ellipse cx="700" cy="490" rx="140" ry="32"/><ellipse cx="400" cy="585" rx="140" ry="32"/><ellipse cx="700" cy="585" rx="140" ry="32"/></g>
+  <g class="t" text-anchor="middle"><text x="400" y="201">CU001 Identificarse por ID</text><text x="400" y="218">CU003 Registrar usuario</text><text x="700" y="201">CU004 Consultar usuario</text><text x="700" y="218">CU005 Asignar rol/perfil</text><text x="400" y="296">CU007 Editar usuario</text><text x="400" y="313">CU008 Activar/desactivar</text><text x="700" y="296">CU009 Consultar auditoría</text><text x="700" y="313">CU010 Suspender/reactivar</text><text x="400" y="391">CU011 Cerrar sesión</text><text x="700" y="391">CU002 Restablecer contraseña*</text><text x="550" y="580">* No aplica: acceso sin contraseña</text></g>
+  <path d="M220 226L260 205M220 226L260 300M220 351L260 205M220 351L260 300M220 351L560 300M220 476L260 205M220 476L260 300M220 476L260 395M220 476L260 490" class="line"/><path d="M540 205L560 395" class="dash"/><text x="555" y="305" class="small">&lt;&lt; extend &gt;&gt;</text>
+
+  <rect x="915" y="110" width="850" height="560" rx="16" class="sys"/><text x="940" y="145" class="module">Sistema Room_911 · Gestionar_permisos_accesos</text>
+  <g class="actor"><rect x="940" y="205" width="160" height="42" rx="8"/><rect x="940" y="330" width="160" height="42" rx="8"/><rect x="940" y="455" width="160" height="42" rx="8"/></g><g class="t" text-anchor="middle"><text x="1020" y="232">ADMINISTRADOR</text><text x="1020" y="357">GUARDIA_SEGURIDAD</text><text x="1020" y="482">OPERARIO</text></g>
+  <g class="uc" text-anchor="middle"><ellipse cx="1300" cy="205" rx="140" ry="32"/><ellipse cx="1600" cy="205" rx="140" ry="32"/><ellipse cx="1300" cy="300" rx="140" ry="32"/><ellipse cx="1600" cy="300" rx="140" ry="32"/><ellipse cx="1300" cy="395" rx="140" ry="32"/><ellipse cx="1600" cy="395" rx="140" ry="32"/><ellipse cx="1300" cy="490" rx="140" ry="32"/><ellipse cx="1600" cy="490" rx="140" ry="32"/><ellipse cx="1300" cy="585" rx="140" ry="32"/></g>
+  <g class="t" text-anchor="middle"><text x="1300" y="201">CU001 Asignar nivel</text><text x="1300" y="218">CU002 Asignar horario</text><text x="1600" y="201">CU003 Consultar horario</text><text x="1600" y="218">CU004 Monitorear intentos</text><text x="1300" y="296">CU005 Asignar tipo medicamento</text><text x="1300" y="313">CU006 Validar reglas</text><text x="1600" y="296">CU001 Solicitar acceso</text><text x="1600" y="313">CU002 Validar acceso</text><text x="1300" y="391">CU003 Recibir validación</text><text x="1300" y="408">CU004 Opción alternativa</text><text x="1300" y="486">Matriz: perfil + horario + estado</text><text x="1300" y="503">+ tipo de medicamento</text></g>
+  <path d="M1100 226L1160 205M1100 226L1460 205M1100 351L1160 205M1100 351L1460 205M1100 476L1460 300M1100 476L1460 395" class="line"/><path d="M1460 300L1440 395M1440 395L1460 490" class="dash"/><text x="1450" y="350" class="small">include / extend</text>
+
+  <rect x="35" y="715" width="850" height="560" rx="16" class="sys"/><text x="60" y="750" class="module">Sistema Room_911 · Gestionar_cronograma</text>
+  <g class="actor"><rect x="60" y="820" width="160" height="42" rx="8"/><rect x="60" y="945" width="160" height="42" rx="8"/><rect x="60" y="1070" width="160" height="42" rx="8"/></g><g class="t" text-anchor="middle"><text x="140" y="847">SECRETARÍA</text><text x="140" y="972">OPERARIO</text><text x="140" y="1097">MOTOR ABAC</text></g>
+  <g class="uc" text-anchor="middle"><ellipse cx="420" cy="820" rx="150" ry="32"/><ellipse cx="720" cy="820" rx="150" ry="32"/><ellipse cx="420" cy="930" rx="150" ry="32"/><ellipse cx="720" cy="930" rx="150" ry="32"/><ellipse cx="420" cy="1040" rx="150" ry="32"/><ellipse cx="720" cy="1040" rx="150" ry="32"/></g><g class="t" text-anchor="middle"><text x="420" y="816">CU001 Crear cronograma</text><text x="420" y="833">Medicamento + día + franja</text><text x="720" y="816">CU002 Editar cronograma</text><text x="720" y="833">CU003 Consultar cronograma</text><text x="420" y="926">CU004 Validar acceso por actividad</text><text x="420" y="943">Día y hora vigentes</text><text x="720" y="926">CU005 Redirigir a opción alternativa</text><text x="720" y="943">Si la decisión es denegada</text><text x="420" y="1036">Tarea alternativa</text><text x="720" y="1036">Registrar resultado en acceso</text></g>
+  <path d="M220 841L270 820M220 966L270 930M220 1091L270 1040" class="line"/><path d="M570 820L570 930M570 930L570 1040" class="dash"/><text x="580" y="885" class="small">&lt;&lt; include &gt;&gt;</text>
+
+  <rect x="915" y="715" width="850" height="560" rx="16" class="sys"/><text x="940" y="750" class="module">Sistema Room_911 · Gestionar_reportes</text>
+  <g class="actor"><rect x="940" y="850" width="160" height="42" rx="8"/><rect x="940" y="1030" width="160" height="42" rx="8"/></g><g class="t" text-anchor="middle"><text x="1020" y="877">ADMINISTRADOR</text><text x="1020" y="1057">GUARDIA_SEGURIDAD</text></g>
+  <g class="uc" text-anchor="middle"><ellipse cx="1350" cy="850" rx="170" ry="34"/><ellipse cx="1350" cy="980" rx="170" ry="34"/><ellipse cx="1350" cy="1110" rx="170" ry="34"/></g><g class="t" text-anchor="middle"><text x="1350" y="846">CU001 Consultar auditoría</text><text x="1350" y="866">Intentos y trazabilidad</text><text x="1350" y="976">CU002 Filtrar accesos</text><text x="1350" y="996">Resultado, usuario, medicamento, fecha</text><text x="1350" y="1106">CU003 Exportar reporte CSV</text><text x="1350" y="1126">Descarga para investigación</text></g>
+  <path d="M1100 871L1180 850M1100 1051L1180 850" class="line"/><path d="M1350 884V946M1350 1014V1076" class="dash"/><text x="1370" y="920" class="small">include</text><text x="1370" y="1050" class="small">extend</text>
 </svg>

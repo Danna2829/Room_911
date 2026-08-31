@@ -46,6 +46,7 @@ pnpm verificar
 
 - [Guía de instalación](GUIA_INSTALACION.md)
 - [Historias de usuario](docs/historias-usuario.md)
+- [Matriz de trazabilidad](docs/matriz-trazabilidad.md)
 - [Mockups](docs/mockups.md)
 - [Diagramas UML](docs/uml.md)
 - [Diagramas visuales SVG](docs/diagramas/README.md)

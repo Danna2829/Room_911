@@ -1,22 +1,65 @@
 flowchart LR
-    empleado([Empleado])
-    guardia([Guardia])
-    secretaria([Secretaría])
-    admin([Administrador])
-    identificar((Identificarse por ID interno))
-    evaluar((Evaluar acceso ABAC))
-    torniquete((Registrar entrada o salida))
-    consultar((Consultar resultado))
-    permisos((Activar o suspender permiso))
-    cronograma((Publicar cronograma))
-    auditoria((Consultar auditoría))
-    alternativa((Asignar tarea alternativa))
-    empleado --> identificar
-    empleado --> torniquete
-    empleado --> consultar
-    guardia --> permisos
-    guardia --> consultar
-    secretaria --> cronograma
-    admin --> auditoria
-    torniquete -. incluye .-> evaluar
-    evaluar -. si deniega .-> alternativa
+  admin([ADMINISTRADOR])
+  guardia([GUARDIA_SEGURIDAD])
+  operario([OPERARIO])
+  secretaria([SECRETARÍA])
+  motor([MOTOR ABAC])
+
+  subgraph usuarios["Sistema Room_911 · Gestionar_usuarios"]
+    U1((CU001 Identificarse por ID interno))
+    U2((CU002 Restablecer contraseña<br/>Fuera de alcance))
+    U3((CU003 Registrar usuario))
+    U4((CU004 Consultar usuario))
+    U5((CU005 Asignar rol/perfil))
+    U7((CU007 Editar usuario))
+    U8((CU008 Activar/desactivar usuario))
+    U9((CU009 Consultar auditoría))
+    U10((CU010 Suspender/reactivar usuario))
+    U11((CU011 Cerrar sesión))
+    U1 -. extend .-> U2
+  end
+  admin --> U1 & U3 & U4 & U5 & U8 & U9 & U11
+  guardia --> U1 & U4 & U9 & U10 & U11
+  operario --> U1 & U4 & U7 & U11
+
+  subgraph permisos["Sistema Room_911 · Gestionar_permisos_accesos"]
+    P1((CU001 Asignar nivel))
+    P2((CU002 Asignar horario))
+    P3((CU003 Consultar horario))
+    P4((CU004 Monitorear intentos))
+    P5((CU005 Asignar tipo medicamento))
+    P6((CU006 Validar reglas))
+    P7((CU001 Solicitar acceso))
+    P8((CU002 Validar acceso))
+    P9((CU003 Recibir validación))
+    P10((CU004 Recibir opción alternativa))
+    P7 -. include .-> P8
+    P8 -. extend .-> P9
+    P9 -. extend .-> P10
+  end
+  admin --> P1 & P2 & P5 & P6
+  guardia --> P3 & P4 & P6
+  operario --> P7
+
+  subgraph cronograma["Sistema Room_911 · Gestionar_cronograma"]
+    C1((CU001 Crear cronograma))
+    C2((CU002 Editar cronograma))
+    C3((CU003 Consultar cronograma))
+    C4((CU004 Validar acceso por actividad))
+    C5((CU005 Redirigir a opción alternativa))
+    C1 -. include .-> C4
+    C4 -. extend .-> C5
+  end
+  secretaria --> C1 & C2 & C3
+  operario --> C3
+  motor --> C4 & C5
+
+  subgraph reportes["Sistema Room_911 · Gestionar_reportes"]
+    R1((CU001 Consultar auditoría))
+    R2((CU002 Filtrar accesos))
+    R3((CU003 Exportar reporte CSV))
+    R1 -. include .-> R2
+    R2 -. extend .-> R3
+  end
+  admin --> R1
+  guardia --> R1
