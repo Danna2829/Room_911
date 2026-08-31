@@ -58,4 +58,5 @@ CREATE TABLE IF NOT EXISTS acceso (
 
 CREATE INDEX IF NOT EXISTS idx_acceso_fecha ON acceso(fecha_hora DESC);
 CREATE INDEX IF NOT EXISTS idx_acceso_usuario ON acceso(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_acceso_resultado ON acceso(resultado);
 CREATE INDEX IF NOT EXISTS idx_cronograma_dia ON cronograma(dia_semana);

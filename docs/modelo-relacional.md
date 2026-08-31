@@ -11,4 +11,4 @@ El script ejecutable es [`database/schema.sql`](../database/schema.sql). Las tab
 | `tarea_alternativa` | `id` | — | Actividades de contingencia activas. |
 | `acceso` | `id` | `usuario_id → usuario.id_usuario`; `medicamento_id → medicamento.id` | Auditoría de entrada/salida y decisión. |
 
-Reglas de integridad: nivel entre 1 y 3; hora final posterior a la inicial; suspensión final posterior o igual a la inicial; `resultado` solo puede ser `PERMITIDO` o `DENEGADO`; `accion` acepta `ENTRADA`, `SALIDA` o `IDENTIFICACION`.
+Reglas de integridad: nivel entre 1 y 3; hora final posterior a la inicial; suspensión final posterior o igual a la inicial; `resultado` solo puede ser `PERMITIDO` o `DENEGADO`; `accion` acepta `ENTRADA`, `SALIDA` o `IDENTIFICACION`. La tabla `acceso` tiene índices por fecha, usuario y resultado para auditoría.

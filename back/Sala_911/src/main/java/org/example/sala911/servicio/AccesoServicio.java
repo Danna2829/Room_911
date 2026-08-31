@@ -36,10 +36,7 @@ public class AccesoServicio {
     public List<RegistroAcceso> todos(){return accesos.findAllByOrderByFechaHoraDesc();}
     public List<RegistroAcceso> porUsuario(String id){return accesos.findByUsuarioIdUsuarioOrderByFechaHoraDesc(id);}
     public List<RegistroAcceso> filtrar(String resultado,String idUsuario,LocalDate desde,LocalDate hasta){
-        return todos().stream().filter(a -> resultado==null || resultado.isBlank() || resultado.equalsIgnoreCase(a.getResultado()))
-                .filter(a -> idUsuario==null || idUsuario.isBlank() || (a.getUsuario()!=null && idUsuario.equalsIgnoreCase(a.getUsuario().getIdUsuario())))
-                .filter(a -> desde==null || !a.getFechaHora().toLocalDate().isBefore(desde))
-                .filter(a -> hasta==null || !a.getFechaHora().toLocalDate().isAfter(hasta)).toList();
+        return accesos.filtrar(resultado==null||resultado.isBlank()?null:resultado,idUsuario==null||idUsuario.isBlank()?null:idUsuario,desde==null?null:desde.atStartOfDay(),hasta==null?null:hasta.plusDays(1).atStartOfDay());
     }
     public String csv(String resultado,String idUsuario,LocalDate desde,LocalDate hasta){
         StringBuilder csv=new StringBuilder("fecha_hora,id_usuario,accion,resultado,medicamento,motivo,tarea_alternativa\n");

@@ -14,6 +14,7 @@
 - Agregadas tres pruebas unitarias del motor ABAC para acceso permitido, tipo no autorizado con tarea alternativa y usuario suspendido.
 - Agregada actualización `PUT /api/cronogramas/{id}` para completar el mantenimiento de franjas.
 - Agregados filtros de auditoría, exportación CSV y pantalla de historial en el frontend.
+- Los filtros ahora se ejecutan mediante consulta parametrizada en PostgreSQL y se agregó índice para `acceso.resultado`.
 
 ## Pendiente de producto
 
