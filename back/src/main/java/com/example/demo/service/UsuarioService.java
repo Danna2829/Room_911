@@ -1,9 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.UsuarioDto;
+import com.example.demo.model.Empleado;
 import com.example.demo.model.PerfilOperario;
 import com.example.demo.model.Rol;
 import com.example.demo.model.Usuario;
+import com.example.demo.repository.EmpleadoRepository;
 import com.example.demo.repository.PerfilOperarioRepository;
 import com.example.demo.repository.RolRepository;
 import com.example.demo.repository.UsuarioRepository;
@@ -33,6 +35,25 @@ public class UsuarioService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmpleadoRepository empleadoRepo;
+
+    /**
+     * Crea o sincroniza el expediente del empleado (persona) asociado a la cuenta.
+     * Los roles administrativos se registran sin nivel ABAC.
+     */
+    private void sincronizarEmpleado(String idEmpleado, String nombre, String apellido, Integer nivel, boolean activo) {
+        Empleado empleado = empleadoRepo.findByIdEmpleado(idEmpleado)
+                .orElseGet(() -> new Empleado(idEmpleado, nombre, apellido, nivel));
+        empleado.setNombre(nombre);
+        empleado.setApellido(apellido);
+        if (nivel != null) {
+            empleado.setNivel(nivel);
+        }
+        empleado.setEstado(activo ? "ACTIVO" : "SUSPENDIDO");
+        empleadoRepo.save(empleado);
+    }
 
     /**
      * Sincroniza usuarios.id_rol con el catalogo roles a partir del nombre del rol.
@@ -102,6 +123,9 @@ public class UsuarioService {
             perfilRepo.save(perfil);
             dto.setNivelAcceso(nivel);
             dto.setDescripcionPerfil(desc);
+            sincronizarEmpleado(savedUser.getIdUsuario(), savedUser.getNombre(), savedUser.getApellido(), nivel, Boolean.TRUE.equals(savedUser.getEstado()));
+        } else {
+            sincronizarEmpleado(savedUser.getIdUsuario(), savedUser.getNombre(), savedUser.getApellido(), null, Boolean.TRUE.equals(savedUser.getEstado()));
         }
 
         dto.setFechaCreacion(savedUser.getFechaCreacion());
@@ -186,6 +210,7 @@ public class UsuarioService {
         sincronizarRol(usuario);
         Usuario savedUser = repo.save(usuario);
 
+        Integer nivelEmpleado = null;
         if (datos.getNivelAcceso() != null || "OPERARIO".equalsIgnoreCase(savedUser.getRol())) {
             int nivel = datos.getNivelAcceso() != null ? datos.getNivelAcceso() : 1;
             String desc = obtenerDescripcionNivel(nivel);
@@ -196,7 +221,10 @@ public class UsuarioService {
             perfilRepo.save(perfil);
             datos.setNivelAcceso(nivel);
             datos.setDescripcionPerfil(desc);
+            nivelEmpleado = nivel;
         }
+        sincronizarEmpleado(savedUser.getIdUsuario(), savedUser.getNombre(), savedUser.getApellido(),
+                nivelEmpleado, Boolean.TRUE.equals(savedUser.getEstado()));
 
         datos.setIdUsuario(savedUser.getIdUsuario());
         datos.setNombre(savedUser.getNombre());
@@ -217,10 +245,11 @@ public class UsuarioService {
         usuario.setEstado(false);
         usuario.setFechaActualizacion(LocalDateTime.now());
         repo.save(usuario);
+        empleadoRepo.findByIdEmpleado(id).ifPresent(e -> e.setEstado("SUSPENDIDO"));
     }
 
     /**
-     * Reactiva un usuario previamente inhabilitado (borrado lógico).
+     * Reactiva un usuario previamente inhabilitado (borrado lógico inverso).
      */
     @Transactional
     public UsuarioDto activarUsuario(String id) {
@@ -228,6 +257,7 @@ public class UsuarioService {
         usuario.setEstado(true);
         usuario.setFechaActualizacion(LocalDateTime.now());
         repo.save(usuario);
+        empleadoRepo.findByIdEmpleado(id).ifPresent(e -> e.setEstado("ACTIVO"));
         return obtenerPorId(id);
     }
 

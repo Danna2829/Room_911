@@ -41,6 +41,31 @@ CREATE TABLE IF NOT EXISTS eventos_especiales (
     fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Registro de empleados (persona / expediente interno EMP-XXXX), separado de la
+-- cuenta de acceso (usuarios). Se sincroniza a nivel de aplicacion en UsuarioService.
+CREATE TABLE IF NOT EXISTS empleados (
+    id_empleado VARCHAR(20) PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    nivel INT CHECK (nivel IN (1, 2, 3)),
+    estado VARCHAR(20) DEFAULT 'ACTIVO',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS id_empleado VARCHAR(20) REFERENCES empleados(id_empleado);
+
+-- Migracion idempotente: crea el expediente de cada cuenta y lo vincula.
+INSERT INTO empleados (id_empleado, nombre, apellido, nivel, estado)
+SELECT u.id_usuario, u.nombre, u.apellido, p.nivel_acceso,
+       CASE WHEN u.estado THEN 'ACTIVO' ELSE 'SUSPENDIDO' END
+FROM usuarios u
+LEFT JOIN perfiles_operario p ON p.id_usuario = u.id_usuario
+WHERE NOT EXISTS (SELECT 1 FROM empleados e WHERE e.id_empleado = u.id_usuario);
+
+UPDATE usuarios SET id_empleado = id_usuario
+WHERE id_empleado IS NULL
+  AND EXISTS (SELECT 1 FROM empleados e WHERE e.id_empleado = usuarios.id_usuario);
+
 CREATE TABLE IF NOT EXISTS perfiles_operario (
     id SERIAL PRIMARY KEY,
     id_usuario VARCHAR(20) UNIQUE REFERENCES usuarios(id_usuario) ON DELETE CASCADE,

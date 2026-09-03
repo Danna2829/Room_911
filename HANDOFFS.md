@@ -370,4 +370,19 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 - Como se hizo: sin npm (pnpm), sin heredocs; verificacion con curl, mvnw test, pnpm build y navegador automatizado.
 - Que sigue: separacion empleados/usuarios (ultimo item del esquema propuesto); renovacion de token; limpieza de datos de prueba (TIPO_TEST, EMP-3872, LOTE-AUDIT); push a GitHub para activar el CI.
 
+## Entrada de Handoff #019
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Separacion empleados/usuarios (esquema propuesto) + eliminacion de UI legacy + limpieza de datos de prueba.
+
+- Que se hizo:
+  1. BD (viva + schema.sql): nueva tabla `empleados` (id_empleado EMP-XXXX PK, nombre, apellido, nivel ABAC 1-3, estado ACTIVO/SUSPENDIDO) y `usuarios.id_empleado` FK. Migracion idempotente: 8 expedientes creados desde usuarios con nivel desde perfiles_operario y estado sincronizado.
+  2. Backend: entidad Empleado + EmpleadoRepository; UsuarioService sincroniza el expediente en todo el ciclo de vida: crearUsuario (crea empleado con nivel si es operario), editarUsuario (nombre/apellido/nivel), eliminarUsuario (-> SUSPENDIDO) y activarUsuario (-> ACTIVO). La cuenta (usuarios) y la persona (empleados) quedan separadas sin romper el contrato de API (la garita sigue identificando por EMP-XXXX).
+  3. Frontend: eliminados 9 archivos legacy sin referencias (components/Admin/*, AdminUsuarios.js, PanelGuardia.js, PanelInventario.js, PanelReportes.js, PanelSecretaria.js, SimuladorGarita.js) que duplicaban vistas y tenian localhost:8080 hardcodeado.
+  4. Limpieza de datos de prueba (borrado logico): TIPO_TEST, EMP-3872, cronograma 2026-09-05 y LOTE-AUDIT quedaron inhabilitados.
+  5. Commit local en main (49 archivos, handoffs #013-#019 incluidos). Push pendiente de credenciales del usuario (HTTPS pide password interactiva; no hay gh ni credential helper).
+  6. Verificacion: ciclo de vida completo via API (crear EMP-3086 -> empleado creado nivel 2; editar nombre -> sincronizado; inhabilitar -> SUSPENDIDO). mvnw test 10/10, pnpm build OK.
+- Como se hizo: sin npm (pnpm), sin heredocs; migraciones idempotentes en BD viva y schema.sql; verificacion con curl/psql y tests.
+- Que sigue: push a GitHub para activar CI (requiere credenciales del usuario); renovacion de token; pruebas end-to-end automatizadas adicionales si se requiere.
+
 

@@ -4,6 +4,7 @@ import com.example.demo.dto.UsuarioDto;
 import com.example.demo.model.PerfilOperario;
 import com.example.demo.model.Rol;
 import com.example.demo.model.Usuario;
+import com.example.demo.repository.EmpleadoRepository;
 import com.example.demo.repository.PerfilOperarioRepository;
 import com.example.demo.repository.RolRepository;
 import com.example.demo.repository.UsuarioRepository;
@@ -39,6 +40,9 @@ class UsuarioServiceTest {
 
     @Mock
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EmpleadoRepository empleadoRepo;
 
     @Test
     @DisplayName("Crear Operario genera formato EMP-XXXX y persiste PerfilOperario con nivel ABAC")
