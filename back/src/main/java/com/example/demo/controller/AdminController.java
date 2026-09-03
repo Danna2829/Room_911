@@ -23,9 +23,37 @@ public class AdminController {
     @Autowired
     private UsuarioRepository usuarioRepo;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @PostMapping("/crear-usuario")
-    public ResponseEntity<UsuarioDto> crearUsuario(@RequestBody UsuarioDto usuario) {
-        return ResponseEntity.ok(service.crearUsuario(usuario));
+    public ResponseEntity<?> crearUsuario(@RequestBody UsuarioDto usuario) {
+        try {
+            return ResponseEntity.ok(service.crearUsuario(usuario));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", e.getMessage()));
+        }
+    }
+
+    /**
+     * Carga masiva de usuarios a partir de una lista (la UI parsea el CSV).
+     * Devuelve el resultado por fila sin abortar el lote completo.
+     */
+    @PostMapping("/crear-usuarios")
+    public ResponseEntity<List<Map<String, Object>>> crearUsuarios(@RequestBody List<UsuarioDto> usuarios) {
+        return ResponseEntity.ok(service.crearUsuarios(usuarios));
+    }
+
+    /**
+     * Reactiva un usuario inhabilitado (borrado logico inverso).
+     */
+    @PutMapping("/usuario/{id}/activar")
+    public ResponseEntity<?> activarUsuario(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(service.activarUsuario(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("mensaje", e.getMessage()));
+        }
     }
 
     @GetMapping("/listar-usuarios")
@@ -43,14 +71,22 @@ public class AdminController {
     }
 
     @PutMapping("/editar-usuario/{id}")
-    public ResponseEntity<UsuarioDto> editarUsuario(@PathVariable String id, @RequestBody UsuarioDto datos) {
-        return ResponseEntity.ok(service.editarUsuario(id, datos));
+    public ResponseEntity<?> editarUsuario(@PathVariable String id, @RequestBody UsuarioDto datos) {
+        try {
+            return ResponseEntity.ok(service.editarUsuario(id, datos));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/eliminar-usuario/{id}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable String id) {
-        service.eliminarUsuario(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> eliminarUsuario(@PathVariable String id) {
+        try {
+            service.eliminarUsuario(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("mensaje", e.getMessage()));
+        }
     }
 
     /**
@@ -80,7 +116,7 @@ public class AdminController {
         }
 
         String tempPassword = "Temp-" + UUID.randomUUID().toString().substring(0, 6);
-        u.setContrasena(tempPassword);
+        u.setContrasena(passwordEncoder.encode(tempPassword));
         u.setTokenReset(null);
         u.setTokenExpiracion(null);
         u.setFechaActualizacion(LocalDateTime.now());

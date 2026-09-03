@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.AccesoRequestDto;
 import com.example.demo.dto.AccesoResponseDto;
+import com.example.demo.dto.PerfilAccesoDto;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -86,32 +90,34 @@ public class ABACEngineService {
                     "Acceso autorizado por supervisión institucional (" + rol + ")", null, null);
         }
 
-        // 5. Consultar Cronograma Operativo del Día (Secretaría)
+        // 5. Consultar Cronograma Operativo del Día (Secretaría): puede haber
+        // varias categorias programadas; se deniega si alguna excede el nivel del operario.
         LocalDate hoy = LocalDate.now();
-        Optional<CronogramaOperativo> optCronograma = cronogramaRepo.findByFecha(hoy);
+        List<CronogramaOperativo> cronogramaHoy = cronogramaRepo.findAllByFechaAndActivoTrue(hoy);
 
-        if (optCronograma.isPresent()) {
-            CronogramaOperativo cronograma = optCronograma.get();
-            Optional<CategoriaMedicamento> optCat = categoriaRepo.findById(cronograma.getIdCategoria());
+        if (!cronogramaHoy.isEmpty()) {
+            // Consultar Nivel de Acceso del Operario
+            Optional<PerfilOperario> optPerfil = perfilRepo.findByIdUsuario(idUsuario);
+            int nivelOperario = optPerfil.map(PerfilOperario::getNivelAcceso).orElse(1);
 
-            if (optCat.isPresent()) {
-                CategoriaMedicamento categoria = optCat.get();
-                
-                // Consultar Nivel de Acceso del Operario
-                Optional<PerfilOperario> optPerfil = perfilRepo.findByIdUsuario(idUsuario);
-                int nivelOperario = optPerfil.map(PerfilOperario::getNivelAcceso).orElse(1);
+            for (CronogramaOperativo cronograma : cronogramaHoy) {
+                Optional<CategoriaMedicamento> optCat = categoriaRepo.findById(cronograma.getIdCategoria());
 
-                // Evaluar Matriz de Permisos ABAC (Nivel vs Tipo de Medicamento)
-                boolean permitido = evaluarMatrizPermisos(nivelOperario, categoria.getCodigo());
+                if (optCat.isPresent()) {
+                    CategoriaMedicamento categoria = optCat.get();
 
-                if (!permitido) {
-                    // Plan de Contingencia: Asignar Tarea Alternativa Automática
-                    String tareaAlternativa = obtenerTareaAlternativaString();
-                    String motivoRechazo = "Restricción por cronograma diario: La sala procesa " + 
-                            categoria.getNombre() + " (" + categoria.getCodigo() + ") y el usuario tiene Nivel " + nivelOperario;
+                    // Evaluar Matriz de Permisos ABAC (Nivel vs Tipo de Medicamento)
+                    boolean permitido = evaluarMatrizPermisos(nivelOperario, categoria.getCodigo());
 
-                    return registrarYResponder(idUsuario, tipoEvento, false, "DENEGADO", 
-                            "Acceso denegado por cronograma", motivoRechazo, tareaAlternativa);
+                    if (!permitido) {
+                        // Plan de Contingencia: Asignar Tarea Alternativa Automática
+                        String tareaAlternativa = obtenerTareaAlternativaString();
+                        String motivoRechazo = "Restricción por cronograma diario: La sala procesa " +
+                                categoria.getNombre() + " (" + categoria.getCodigo() + ") y el usuario tiene Nivel " + nivelOperario;
+
+                        return registrarYResponder(idUsuario, tipoEvento, false, "DENEGADO",
+                                "Acceso denegado por cronograma", motivoRechazo, tareaAlternativa);
+                    }
                 }
             }
         }
@@ -147,9 +153,61 @@ public class ABACEngineService {
     }
 
     /**
-     * Obtiene una tarea alternativa dinámica del plan de contingencia
+     * Perfil de acceso para el torniquete: nivel ABAC del operario, categorias
+     * que puede manipular segun su nivel y veredicto sobre la programacion de hoy.
      */
-    private String obtenerTareaAlternativaString() {
+    public PerfilAccesoDto consultarPerfilAcceso(String idUsuario) {
+        PerfilAccesoDto dto = new PerfilAccesoDto();
+        Usuario usuario = usuarioRepo.findById(idUsuario).orElse(null);
+        if (usuario == null) {
+            return dto;
+        }
+
+        dto.setIdUsuario(usuario.getIdUsuario());
+        dto.setNombre(usuario.getNombre() + " " + usuario.getApellido());
+        dto.setRol(usuario.getRol());
+        dto.setEstado(usuario.getEstado());
+
+        Optional<PerfilOperario> optPerfil = perfilRepo.findByIdUsuario(idUsuario);
+        int nivel = optPerfil.map(PerfilOperario::getNivelAcceso).orElse(1);
+        dto.setNivelAcceso(nivel);
+        optPerfil.ifPresent(p -> dto.setDescripcionPerfil(p.getDescripcion()));
+
+        // Categorias que su nivel puede manipular
+        for (CategoriaMedicamento cat : categoriaRepo.findAll()) {
+            if (Boolean.FALSE.equals(cat.getActivo())) continue;
+            if (evaluarMatrizPermisos(nivel, cat.getCodigo())) {
+                dto.getCategoriasPermitidas().add(categoriaComoMapa(cat));
+            }
+        }
+
+        // Veredicto ABAC sobre la programacion activa de hoy
+        LocalDate hoy = LocalDate.now();
+        List<CronogramaOperativo> cronogramaHoy = cronogramaRepo.findAllByFechaAndActivoTrue(hoy);
+        for (CronogramaOperativo c : cronogramaHoy) {
+            categoriaRepo.findById(c.getIdCategoria()).ifPresent(cat -> {
+                Map<String, Object> fila = categoriaComoMapa(cat);
+                fila.put("permitido", evaluarMatrizPermisos(nivel, cat.getCodigo()));
+                dto.getCronogramaHoy().add(fila);
+            });
+        }
+
+        return dto;
+    }
+
+    private Map<String, Object> categoriaComoMapa(CategoriaMedicamento cat) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", cat.getId());
+        m.put("codigo", cat.getCodigo());
+        m.put("nombre", cat.getNombre());
+        m.put("esRestringido", cat.getEsRestringido());
+        return m;
+    }
+
+    /**
+     * Tarea alternativa del plan de contingencia (para redirección tras intentos fallidos)
+     */
+    public String obtenerTareaAlternativaString() {
         List<TareaAlternativa> tareas = tareaRepo.findByActivoTrue();
         if (!tareas.isEmpty()) {
             int randomIndex = (int) (Math.random() * tareas.size());

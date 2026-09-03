@@ -274,3 +274,100 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 
 - Como se hizo: Lectura directa de schema.sql/data.sql y documentacion en README. Sin npm (pnpm).
 - Que sigue: Prueba end-to-end en la PC destino con docker compose up -d. Opcional: agregar CI (GitHub Actions) y secretos externos para produccion.
+
+## Entrada de Handoff #013
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Auditoria de ejecucion end-to-end (sin Docker) y correccion del bug critico de login.
+
+- Que se hizo:
+  1. Stack levantado sin Docker: PostgreSQL reutilizando el contenedor podman existente `postgres-dev` (puerto 5432, credenciales del .env.example) y creando la base `Sala_911`. Backend arrancado con `./mvnw spring-boot:run` usando JDK 17 de Temurin descargado en `~/tools/jdk-17.0.20.1+1` (el sistema solo tenia JRE 25 sin javac y no hay sudo para instalar `java-devel`). Frontend arrancado con `pnpm start` en http://localhost:3000.
+  2. Verificacion backend: `mvnw test` 10/10 OK. Smoke test de todos los controladores: login, cronograma (GET/POST), categorias, inventario, acceso/evaluar, acceso/monitor, guardia/suspender, admin/listar-usuarios, reportes/accesos. Todos responden correctamente.
+  3. BUG CRITICO encontrado y corregido: el login web nunca funciono. `AuthController.login` leia la clave `"contraseña"` (con ñ) del JSON, pero el frontend (`AuthContext.jsx`) envia `"contrasena"`. Resultado: siempre 400 "Correo y contraseña son obligatorios". Fix en `back/src/main/java/com/example/demo/controller/AuthController.java`: aceptar `"contrasena"` con fallback a `"contraseña"` (mismo patron que ya usaba UsuarioDto con @JsonAlias). Verificado con mvnw test (10/10) y en navegador: login admin@farmaceutica.com/admin123 -> dashboard OK, y evaluacion ABAC en Garita (EMP-8821 -> PERMITIDO) OK.
+  4. Hallazgos de auditoria sin corregir (pendientes):
+     - Seguridad: SecurityConfig tiene `permitAll` en todo; no hay JWT/sesion servidor; la "autenticacion" es solo cliente. Contraseñas en texto plano en BD y comparadas con equals.
+     - DTOs de entrada sin validacion (@Valid faltante): p.ej. POST /inventario/entrada sin `lote` lanza 500 con stacktrace expuesto; falta manejo global de excepciones (considerar @ControllerAdvice).
+     - Dos UIs paralelas en el frontend: `pages/*.jsx` (activas en App.js) y `components/Panel*.js` + `SimuladorGarita.js` + `AdminUsuarios.js` (legacy, sin referencias; `PanelReportes.js` abre hardcoded localhost:8080). Candidatas a eliminarse.
+     - Dashboard muestra datos de demostracion, no datos reales de la API.
+     - `spring.jpa.open-in-view` sin configurar explicitamente (warning de Spring).
+
+- Como se hizo: sin npm (pnpm), sin heredocs para editar archivos (ediciones con herramienta dedicada), inspeccion de logs y simulacion de preflight CORS con curl, verificacion visual con navegador automatizado.
+- Que sigue: decidir estrategia de seguridad real (JWT + BCrypt) o documentar el alcance del reto; agregar @ControllerAdvice y validacion de DTOs; eliminar UI legacy; conectar Dashboard a datos reales; CI (GitHub Actions: mvn test + pnpm build).
+
+## Entrada de Handoff #014
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Auditoria #2 de base de datos (BD viva) y evaluacion del esquema propuesto de reemplazo.
+
+- Que se hizo:
+  1. Leido el dominio del reto en Documentacion/Reto_room_911_Extendido.pdf (ABAC por niveles 1-3, cronograma diario por categoria, suspensiones por rango de fechas, tareas alternativas, garita ENTRADA/SALIDA).
+  2. Auditada la BD viva Sala_911: 8 tablas, 51 columnas, 18 constraints, conteos por tabla.
+  3. Hallazgo critico: cuentas semilla EMP-0000/0001/0002 quedaron estado=false (borrado logico desde el panel Usuarios a las 14:13-14:14) y el login admin devolvia 403; se reactivaron.
+  4. Fixes de endurecimiento aplicados a la BD viva y a schema.sql: indice unico parcial uq_cronograma_fecha_categoria_activo (fecha,id_categoria) WHERE activo; NOT NULL en perfiles_operario.id_usuario; CHECK chk_tipo_evento/chk_resultado en registros_auditoria; indices idx_suspensiones_usuario_activo e idx_auditoria_usuario.
+  5. Evaluado el esquema propuesto por el usuario (roles/empleados/usuarios/medicamentos/registro_accesos/eventos_especiales): NO migrar integralmente; pierde cronograma (nucleo del reto), suspensiones por rango, tareas alternativas, inventario y recuperacion de contrasena; obligaria a reescribir ~8 entidades, 7 controladores, motor ABAC y 6 vistas. Se recomienda adoptar sus buenas ideas incrementalmente (catalogo roles con SECRETARIA/SUPERADMINISTRADOR, separar empleado de usuario, eventos_especiales).
+  6. Informe completo en AUDITORIA_DB.md (seccion Auditoria #2). mvnw test 10/10 tras los cambios.
+
+## Entrada de Handoff #015
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Evolucion de BD recomendada + implementacion de paneles por rol, torniquete de operario, reportes Excel/PDF, carga masiva, CRUD de medicamentos, eventos de guardia y recuperacion con codigo visible.
+
+- Que se hizo:
+  1. BD (schema.sql + BD viva): catalogo `roles` (5 roles) + `usuarios.id_rol` (sincronizado por UsuarioService al crear/editar); tabla `eventos_especiales` para la bitacora de guardia.
+  2. Backend: `GET /api/acceso/perfil/{id}` (nivel ABAC + categorias permitidas + veredicto del cronograma de hoy); `GET /api/acceso/tarea-alternativa`; `PUT /api/admin/usuario/{id}/activar` (reactiva soft-delete); `POST /api/admin/crear-usuarios` (carga masiva con resultado por fila); `GET /api/reportes/exportar/xlsx` y `/pdf` (Apache POI + OpenPDF, agregados al pom); recuperacion de contrasena con codigo numerico de 6 digitos visible en pantalla (valido 15 min); `POST|GET /api/guardia/eventos`; el motor ABAC ahora evalua TODAS las categorias activas del dia (conservador: deniega si alguna excede el nivel) y SecretariaController reactiva por pareja (fecha, categoria) para convivir con el indice unico parcial.
+  3. Frontend: navegacion y rutas filtradas por rol (`auth/roles.js` + RoleRoute); redireccion post-login por rol (Operario->garita, Guardia->monitor, Secretaria->cronograma, Admin->dashboard); Garita en modo operario (ID bloqueado al expediente propio, card de perfil con nivel y medicamentos a manipular, 3 intentos fallidos -> tarjeta de opcion alternativa); Usuarios con botones Activar/Inhabilitar y modal de carga masiva CSV con plantilla y resultado por fila; nueva pagina `Medicamentos` (CRUD categorias); Reportes con exportacion CSV/Excel/PDF; Monitor con seccion de eventos especiales de guardia; login con modal de recuperacion que muestra el codigo 15 segundos.
+  4. Tests actualizados al nuevo contrato (ABACEngineServiceTest usa findAllByFechaAndActivoTrue; UsuarioServiceTest mockea RolRepository). mvnw test 10/10 BUILD SUCCESS. pnpm build exit 0.
+  5. Verificado en navegador: login por roles, torniquete del operario (permitido + perfil), contingencia de 3 intentos con suspension de guardia, monitor del guardia con exitosos/fallidos y eventos, CRUD medicamentos, carga masiva (usuario demo EMP-3607 Ana Torres), exportaciones y codigo de recuperacion visible.
+
+- Como se hizo: sin npm (pnpm), ediciones con herramientas dedicadas (sin heredocs), verificacion con mvnw test, curl y navegador automatizado. Se requirio reiniciar el proceso del backend porque devtools no resuelve dependencias nuevas del pom (NoClassDefFoundError POI/OpenPDF en el arranque en caliente).
+- Que sigue: seguridad real (BCrypt + JWT/sesion) ya que SecurityConfig sigue permitAll; separacion empleados/usuarios del esquema propuesto; @ControllerAdvice para errores; conectar Dashboard a datos reales; CI.
+
+## Entrada de Handoff #016
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Auditoria de CRUDs (crear, leer, modificar, soft delete, reactivar) y correccion de hallazgos.
+
+- Que se hizo:
+  1. Auditados los 6 CRUDs del sistema contra la BD viva probando ciclo completo (crear -> editar -> soft delete -> reactivar) con verificacion en BD de que ninguna fila se borra fisicamente.
+  2. Hallazgos corregidos:
+     a. Usuarios: crear/editar con correo o ID duplicado lanzaba 500 con stacktrace. Ahora valida y devuelve 400 con mensaje accionable; eliminar-usuario de ID inexistente devuelve 404; editar-usuario devuelve el DTO mapeado desde la entidad (antes reflejaba nulls del request).
+     b. Categorias (Medicamentos): crear con codigo duplicado lanzaba 500; ahora 400 con mensaje, y editar valida codigo duplicado excluyendo la propia fila.
+     c. Cronograma: PUT /{id} podia chocar con el indice unico parcial (fecha, categoria); ahora valida y devuelve 400. Se agrego PUT /{id}/reactivar (soft delete inverso). La UI tenia solo crear/inhabilitar: se agrego Editar (reusa el modal) y Reactivar.
+     d. Inventario: no tenia reactivar; se agrego PUT /{id}/reactivar + boton Reactivar en la UI para movimientos anulados.
+     e. Suspensiones: no tenia reactivar; se agrego PUT /guardia/suspensiones/{id}/reactivar + boton Reactivar en Monitor para suspensiones revocadas.
+     f. Eventos especiales: por diseno (bitacora de auditoria) no tienen editar/eliminar; documentado como decision.
+  3. Verificacion: ciclo CRUD completo por entidad con curl + consultas psql (estado/activo en false tras soft delete, counts de filas intactos). mvnw test 10/10 BUILD SUCCESS. pnpm build exit 0.
+  4. Datos de prueba dejados en BD (demo): categoria TIPO_TEST, usuario EMP-3872 test.crud@farmaceutica.com (reactivado), cronograma 2026-09-05 (TIPO_TEST), movimiento LOTE-AUDIT, suspension CAMBIO_TURNO para EMP-8823 (revocada al final).
+- Como se hizo: sin npm (pnpm), sin heredocs; compilacion con devtools hot-reload; pruebas con curl y psql.
+- Que sigue: BCrypt + JWT; separacion empleados/usuarios; @ControllerAdvice central (los 400 quedaron por controlador); Dashboard con datos reales; CI.
+
+## Entrada de Handoff #017
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Seguridad real en el backend: BCrypt para contrasenas + JWT stateless con autorizacion por rol en cada endpoint.
+
+- Que se hizo:
+  1. BCrypt: PasswordEncoder (BCryptPasswordEncoder) como bean. MigrationRunner (ApplicationRunner) cifra al arranque toda contrasena sin prefijo $2 (migracion idempotente; verificada en BD: usuarios con hash $2a$). Encode aplicado en crear/editar usuario, reset-password de superadmin y restablecer-contrasena con codigo.
+  2. JWT: JwtService (jjwt 0.12.6, HS256, subject=idUsuario, claim rol, expiracion 8h, secret configurable via JWT_SECRET) y JwtAuthFilter (valida Bearer, carga usuario, exige estado activo, establece ROLE_<rol>). Login devuelve token; el soft delete de un usuario invalida sus tokens.
+  3. SecurityConfig: stateless + CORS bean (preflight permitido). Reglas: /api/auth publico; /api/acceso autenticado; /api/admin solo ADMIN/SUPERADMIN; /api/guardia GUARDIA/ADMIN/SUPERADMIN; escrituras de cronograma/categorias/inventario SECRETARIA/ADMIN/SUPERADMIN; /api/reportes ADMIN/GUARDIA/SECRETARIA/SUPERADMIN; resto autenticado. 401 JSON sin token/invalido y 403 JSON sin permisos (entry point y access denied handler propios).
+  4. GlobalExceptionHandler (@RestControllerAdvice): IllegalArgument->400, validacion->400, DataIntegrityViolation->409, RuntimeException->500 sin stacktrace.
+  5. Frontend: AuthContext persiste room911_token; axios adjunta Authorization Bearer a cada peticion y en 401 limpia sesion y redirige a /login.
+  6. Verificacion: matriz de seguridad 11/11 con curl (401 sin token, 403 operario->admin, 200 operario->evaluar, 403 operario->guardia, 200 guardia->reportes, 403 guardia->POST cronograma, 401 token falso, 401 password incorrecta). mvnw test 10/10 (UsuarioServiceTest mockea PasswordEncoder). pnpm build OK. Navegador: login operario + evaluacion en garita funcionan con token adjunto.
+- Como se hizo: sin npm (pnpm), sin heredocs; se requirio reinicio completo del backend por dependencia nueva (jjwt).
+- Que sigue: separacion empleados/usuarios; Dashboard con datos reales; CI (mvn test + pnpm build); refresco de token/renovacion si se requiere sesiones largas.
+
+## Entrada de Handoff #018
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Panel General con datos reales + CI con GitHub Actions + ajustes de configuracion.
+
+- Que se hizo:
+  1. Backend: nuevo `GET /api/dashboard/resumen` (DashboardController + DashboardResumenDto) con metricas reales: accesos/permitidos/denegados de hoy (auditoria por rango de dia), operarios activos, medicamentos activos, programados hoy, suspensiones vigentes y ultimos 10 accesos (nuevo metodo findTop10ByOrderByTimestampDesc). Seguridad: /api/dashboard solo ADMIN/SUPERADMIN/SECRETARIA.
+  2. Frontend: Dashboard.jsx reescrito: 4 StatCards reales, alertas de programacion del dia y suspensiones vigentes, tabla de ultimos accesos reales. Se elimino el banner de demo y el modal falso de "Nuevo acceso" (la evaluacion vive en Garita).
+  3. CI: .github/workflows/ci.yml con dos jobs: backend (temurin 17 + servicio postgres:15 con credenciales del proyecto + ./mvnw test) y frontend (node 20 + pnpm 11 + pnpm build --frozen-lockfile). Trigger en push/PR a main.
+  4. Configuracion: spring.jpa.open-in-view=false (elimina el warning de Spring y evita queries en render).
+  5. Verificacion: dashboard/resumen responde metricas correctas con token admin (403 para operario); mvnw test 10/10 BUILD SUCCESS; pnpm build OK; Panel General verificado en navegador mostrando accesos reales.
+- Como se hizo: sin npm (pnpm), sin heredocs; verificacion con curl, mvnw test, pnpm build y navegador automatizado.
+- Que sigue: separacion empleados/usuarios (ultimo item del esquema propuesto); renovacion de token; limpieza de datos de prueba (TIPO_TEST, EMP-3872, LOTE-AUDIT); push a GitHub para activar el CI.
+
+

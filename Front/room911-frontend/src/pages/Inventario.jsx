@@ -49,6 +49,16 @@ export default function Inventario() {
     }
   };
 
+  const reactivar = async (id) => {
+    try {
+      await api.put(`/inventario/${id}/reactivar`);
+      toast.push({ type: "success", title: "Movimiento reactivado" });
+      reload();
+    } catch {
+      toast.push({ type: "danger", title: "Error al reactivar" });
+    }
+  };
+
   const columns = [
     { key: "id", label: "#", sortable: true },
     { key: "categoria", label: "Categoría", sortable: true, render: (r) => catName(r.idCategoria) },
@@ -76,7 +86,9 @@ export default function Inventario() {
             Anular
           </Button>
         ) : (
-          <span className="text-muted-2 small">—</span>
+          <Button variant="soft" size="sm" icon="arrow-counterclockwise" onClick={() => reactivar(r.id)}>
+            Reactivar
+          </Button>
         ),
     },
   ];

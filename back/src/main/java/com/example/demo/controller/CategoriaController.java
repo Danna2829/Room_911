@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/categorias")
@@ -21,15 +22,27 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoriaMedicamento> crearCategoria(@RequestBody CategoriaMedicamento cat) {
+    public ResponseEntity<?> crearCategoria(@RequestBody CategoriaMedicamento cat) {
+        if (cat.getCodigo() == null || cat.getCodigo().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", "El código es obligatorio"));
+        }
+        if (categoriaRepo.findByCodigo(cat.getCodigo()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", "Ya existe una categoría con el código " + cat.getCodigo()));
+        }
         cat.setActivo(true);
         return ResponseEntity.ok(categoriaRepo.save(cat));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaMedicamento> editarCategoria(@PathVariable Long id, @RequestBody CategoriaMedicamento datos) {
-        return categoriaRepo.findById(id).map(c -> {
-            if (datos.getCodigo() != null) c.setCodigo(datos.getCodigo());
+    public ResponseEntity<?> editarCategoria(@PathVariable Long id, @RequestBody CategoriaMedicamento datos) {
+        return categoriaRepo.findById(id).<ResponseEntity<?>>map(c -> {
+            if (datos.getCodigo() != null) {
+                var existente = categoriaRepo.findByCodigo(datos.getCodigo());
+                if (existente.isPresent() && !existente.get().getId().equals(id)) {
+                    return ResponseEntity.badRequest().body(Map.of("mensaje", "Ya existe otra categoría con el código " + datos.getCodigo()));
+                }
+                c.setCodigo(datos.getCodigo());
+            }
             if (datos.getNombre() != null) c.setNombre(datos.getNombre());
             if (datos.getDescripcion() != null) c.setDescripcion(datos.getDescripcion());
             if (datos.getEsRestringido() != null) c.setEsRestringido(datos.getEsRestringido());

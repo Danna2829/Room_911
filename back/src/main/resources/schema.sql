@@ -2,6 +2,17 @@
 
 ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_rol_check;
 
+-- Catalogo de roles (RBAC). usuarios.id_rol referencia este catalogo y
+-- la columna usuarios.rol se mantiene sincronizada a nivel de aplicacion.
+CREATE TABLE IF NOT EXISTS roles (
+    id_rol SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE
+);
+
+INSERT INTO roles (nombre) VALUES
+    ('SUPERADMINISTRADOR'), ('ADMINISTRADOR'), ('GUARDIA_SEGURIDAD'), ('SECRETARIA'), ('OPERARIO')
+ON CONFLICT (nombre) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS usuarios (
     id_usuario VARCHAR(20) PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -16,6 +27,19 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_reset VARCHAR(255);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_expiracion TIMESTAMP;
+
+-- Vinculo con el catalogo de roles (se añade si el despliegue es previo al catalogo).
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS id_rol INT REFERENCES roles(id_rol);
+UPDATE usuarios u SET id_rol = r.id_rol FROM roles r WHERE u.rol = r.nombre AND u.id_rol IS NULL;
+
+-- Bitacora de eventos especiales registrados por la Guardia.
+CREATE TABLE IF NOT EXISTS eventos_especiales (
+    id_evento SERIAL PRIMARY KEY,
+    id_usuario VARCHAR(20) REFERENCES usuarios(id_usuario),
+    tipo_evento VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE IF NOT EXISTS perfiles_operario (
     id SERIAL PRIMARY KEY,
@@ -81,3 +105,21 @@ CREATE TABLE IF NOT EXISTS inventario_medicamentos (
 CREATE INDEX IF NOT EXISTS idx_usuarios_correo ON usuarios(correo);
 CREATE INDEX IF NOT EXISTS idx_cronograma_fecha ON cronograma_operativo(fecha);
 CREATE INDEX IF NOT EXISTS idx_auditoria_timestamp ON registros_auditoria(timestamp);
+
+-- Endurecimiento del esquema (auditoria 2026-09-03): idempotentes para arranques repetidos.
+
+-- Un unico cronograma activo por (fecha, categoria); el indice parcial permite
+-- conservar filas inhabilitadas (activo = FALSE) sin bloquear nuevas programaciones.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cronograma_fecha_categoria_activo
+    ON cronograma_operativo (fecha, id_categoria) WHERE activo = TRUE;
+
+-- Un perfil de operario siempre pertenece a un usuario.
+ALTER TABLE perfiles_operario ALTER COLUMN id_usuario SET NOT NULL;
+
+-- Dominio de valores en el registro de auditoria.
+ALTER TABLE registros_auditoria ADD CONSTRAINT chk_tipo_evento CHECK (tipo_evento IN ('ENTRADA','SALIDA'));
+ALTER TABLE registros_auditoria ADD CONSTRAINT chk_resultado CHECK (resultado IN ('PERMITIDO','DENEGADO'));
+
+-- Indices de consulta para guardia y trazabilidad.
+CREATE INDEX IF NOT EXISTS idx_suspensiones_usuario_activo ON suspensiones_permiso (id_usuario, activo);
+CREATE INDEX IF NOT EXISTS idx_auditoria_usuario ON registros_auditoria (id_usuario);

@@ -16,23 +16,46 @@ export default function Cronograma() {
   const { data: lista, loading, error, reload } = useFetch(() => api.get("/cronograma").then((r) => r.data));
   const { data: cats } = useFetch(() => api.get("/categorias").then((r) => r.data));
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ fecha: "", idCategoria: "", observaciones: "" });
 
   const catName = (id) => cats.find((c) => String(c.id) === String(id))?.nombre || "—";
 
+  const openNew = () => {
+    setEditing(null);
+    setForm({ fecha: "", idCategoria: "", observaciones: "" });
+    setOpen(true);
+  };
+
+  const openEdit = (r) => {
+    setEditing(r);
+    setForm({ fecha: r.fecha || "", idCategoria: String(r.idCategoria || ""), observaciones: r.observaciones || "" });
+    setOpen(true);
+  };
+
   const submit = async () => {
     try {
-      await api.post("/cronograma", {
-        fecha: form.fecha || undefined,
-        idCategoria: form.idCategoria ? Number(form.idCategoria) : null,
-        observaciones: form.observaciones,
-      });
-      toast.push({ type: "success", title: "Cronograma guardado" });
+      if (editing) {
+        await api.put(`/cronograma/${editing.id}`, {
+          fecha: form.fecha || undefined,
+          idCategoria: form.idCategoria ? Number(form.idCategoria) : null,
+          observaciones: form.observaciones,
+        });
+        toast.push({ type: "success", title: "Cronograma actualizado" });
+      } else {
+        await api.post("/cronograma", {
+          fecha: form.fecha || undefined,
+          idCategoria: form.idCategoria ? Number(form.idCategoria) : null,
+          observaciones: form.observaciones,
+        });
+        toast.push({ type: "success", title: "Cronograma guardado" });
+      }
       setOpen(false);
+      setEditing(null);
       setForm({ fecha: "", idCategoria: "", observaciones: "" });
       reload();
-    } catch {
-      toast.push({ type: "danger", title: "Error", message: "No se pudo guardar." });
+    } catch (err) {
+      toast.push({ type: "danger", title: "Error", message: err.response?.data?.mensaje || "No se pudo guardar." });
     }
   };
 
@@ -43,6 +66,16 @@ export default function Cronograma() {
       reload();
     } catch {
       toast.push({ type: "danger", title: "Error al inhabilitar" });
+    }
+  };
+
+  const reactivar = async (id) => {
+    try {
+      await api.put(`/cronograma/${id}/reactivar`);
+      toast.push({ type: "success", title: "Programación reactivada" });
+      reload();
+    } catch (err) {
+      toast.push({ type: "danger", title: "Error", message: err.response?.data?.mensaje || "No se pudo reactivar." });
     }
   };
 
@@ -61,11 +94,18 @@ export default function Cronograma() {
       label: "",
       render: (r) =>
         r.activo ? (
-          <Button variant="soft" size="sm" icon="slash-circle" onClick={() => inhabilitar(r.id)}>
-            Inhabilitar
-          </Button>
+          <div className="d-flex gap-2">
+            <Button variant="soft" size="sm" icon="pencil" onClick={() => openEdit(r)}>
+              Editar
+            </Button>
+            <Button variant="outline" size="sm" icon="slash-circle" onClick={() => inhabilitar(r.id)}>
+              Inhabilitar
+            </Button>
+          </div>
         ) : (
-          <span className="text-muted-2 small">—</span>
+          <Button variant="soft" size="sm" icon="arrow-counterclockwise" onClick={() => reactivar(r.id)}>
+            Reactivar
+          </Button>
         ),
     },
   ];
@@ -75,7 +115,7 @@ export default function Cronograma() {
       <PageHeader
         title="Cronograma Operativo"
         subtitle="Programación diaria de la categoría de medicamento en room_911"
-        actions={<Button icon="calendar-plus" onClick={() => setOpen(true)}>Programar día</Button>}
+        actions={<Button icon="calendar-plus" onClick={openNew}>Programar día</Button>}
       />
 
       {loading ? (
@@ -105,8 +145,8 @@ export default function Cronograma() {
 
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
-        title="Programar cronograma diario"
+        onClose={() => { setOpen(false); setEditing(null); }}
+        title={editing ? "Editar programación" : "Programar cronograma diario"}
         footer={
           <>
             <Button variant="soft" onClick={() => setOpen(false)}>

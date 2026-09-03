@@ -12,4 +12,5 @@ public interface RegistroAuditoriaRepository extends JpaRepository<RegistroAudit
     List<RegistroAuditoria> findByIdUsuario(String idUsuario);
     List<RegistroAuditoria> findByTimestampBetween(LocalDateTime inicio, LocalDateTime fin);
     List<RegistroAuditoria> findByResultado(String resultado);
+    List<RegistroAuditoria> findTop10ByOrderByTimestampDesc();
 }

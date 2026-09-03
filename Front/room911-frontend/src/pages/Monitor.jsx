@@ -46,6 +46,53 @@ export default function Monitor() {
     }
   };
 
+  const reactivarSuspension = async (id) => {
+    try {
+      await api.put(`/guardia/suspensiones/${id}/reactivar`);
+      toast.push({ type: "success", title: "Suspensión reactivada" });
+      reloadS();
+    } catch {
+      toast.push({ type: "danger", title: "Error al reactivar" });
+    }
+  };
+
+  // Eventos especiales de guardia (incidentes, alertas y otras ocurrencias).
+  const { data: eventos, reload: reloadEv } = useFetch(() => api.get("/guardia/eventos").then((r) => r.data));
+  const [eventoOpen, setEventoOpen] = useState(false);
+  const [eventoForm, setEventoForm] = useState({ tipoEvento: "ALERTA_SEGURIDAD", idUsuario: "", descripcion: "" });
+
+  const submitEvento = async () => {
+    if (!eventoForm.descripcion.trim()) {
+      toast.push({ type: "danger", title: "Datos incompletos", message: "Describe el evento." });
+      return;
+    }
+    try {
+      await api.post("/guardia/eventos", {
+        tipoEvento: eventoForm.tipoEvento,
+        idUsuario: eventoForm.idUsuario || undefined,
+        descripcion: eventoForm.descripcion,
+      });
+      toast.push({ type: "success", title: "Evento registrado" });
+      setEventoOpen(false);
+      setEventoForm({ tipoEvento: "ALERTA_SEGURIDAD", idUsuario: "", descripcion: "" });
+      reloadEv();
+    } catch {
+      toast.push({ type: "danger", title: "Error al registrar el evento" });
+    }
+  };
+
+  const colEventos = [
+    { key: "fechaHora", label: "Fecha/Hora", sortable: true, render: (r) => fmtDateTime(r.fechaHora) },
+    { key: "idUsuario", label: "Operario", sortable: true, render: (r) => r.idUsuario || "—" },
+    {
+      key: "tipoEvento",
+      label: "Tipo",
+      sortable: true,
+      render: (r) => <StatusPill tone="warning">{r.tipoEvento}</StatusPill>,
+    },
+    { key: "descripcion", label: "Descripción" },
+  ];
+
   const colAcc = [
     { key: "idUsuario", label: "Operario", sortable: true },
     { key: "timestamp", label: "Fecha/Hora", sortable: true, render: (r) => fmtDateTime(r.timestamp) },
@@ -83,7 +130,9 @@ export default function Monitor() {
             Revocar
           </Button>
         ) : (
-          <span className="text-muted-2 small">—</span>
+          <Button variant="soft" size="sm" icon="arrow-counterclockwise" onClick={() => reactivarSuspension(r.id)}>
+            Reactivar
+          </Button>
         ),
     },
   ];
@@ -126,6 +175,66 @@ export default function Monitor() {
         Suspensiones
       </h5>
       <DataTable columns={colSus} data={suspensiones} searchKeys={["idUsuario", "motivo"]} emptyText="No hay suspensiones registradas." />
+
+      <div className="d-flex align-items-center justify-content-between mt-4 mb-3">
+        <h5 className="mb-0">
+          <Icon name="journal-text" className="me-2" />
+          Eventos especiales de guardia
+        </h5>
+        <Button variant="soft" size="sm" icon="plus-lg" onClick={() => setEventoOpen(true)}>
+          Registrar evento
+        </Button>
+      </div>
+      <DataTable
+        columns={colEventos}
+        data={eventos}
+        searchKeys={["idUsuario", "tipoEvento", "descripcion"]}
+        emptyText="No hay eventos especiales registrados."
+      />
+
+      <Modal
+        open={eventoOpen}
+        onClose={() => setEventoOpen(false)}
+        title="Registrar evento especial"
+        footer={
+          <>
+            <Button variant="soft" onClick={() => setEventoOpen(false)}>
+              Cancelar
+            </Button>
+            <Button icon="check-lg" onClick={submitEvento}>
+              Registrar
+            </Button>
+          </>
+        }
+      >
+        <SelectField
+          id="tipoEv"
+          label="Tipo de evento"
+          value={eventoForm.tipoEvento}
+          onChange={(e) => setEventoForm((f) => ({ ...f, tipoEvento: e.target.value }))}
+          options={[
+            { value: "ALERTA_SEGURIDAD", label: "ALERTA_SEGURIDAD" },
+            { value: "INCIDENTE", label: "INCIDENTE" },
+            { value: "VISITA_TECNICA", label: "VISITA_TECNICA" },
+            { value: "MANTENIMIENTO", label: "MANTENIMIENTO" },
+            { value: "OTRO", label: "OTRO" },
+          ]}
+        />
+        <TextField
+          id="iduEv"
+          label="ID de operario involucrado (opcional)"
+          icon="person-badge"
+          placeholder="EMP-8821"
+          value={eventoForm.idUsuario}
+          onChange={(e) => setEventoForm((f) => ({ ...f, idUsuario: e.target.value }))}
+        />
+        <TextField
+          id="descEv"
+          label="Descripción"
+          value={eventoForm.descripcion}
+          onChange={(e) => setEventoForm((f) => ({ ...f, descripcion: e.target.value }))}
+        />
+      </Modal>
 
       <Modal
         open={open}

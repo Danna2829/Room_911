@@ -4,6 +4,8 @@ import api from "../api/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const [token, setToken] = useState(() => localStorage.getItem("room911_token"));
+
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("room911_user"));
@@ -20,18 +22,22 @@ export function AuthProvider({ children }) {
       correo: data.correo,
       rol: data.rol,
     };
+    localStorage.setItem("room911_token", data.token);
     localStorage.setItem("room911_user", JSON.stringify(u));
+    setToken(data.token);
     setUser(u);
     return u;
   }, []);
 
   const logout = useCallback(() => {
+    localStorage.removeItem("room911_token");
     localStorage.removeItem("room911_user");
+    setToken(null);
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

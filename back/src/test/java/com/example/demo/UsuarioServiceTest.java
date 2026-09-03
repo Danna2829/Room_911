@@ -2,8 +2,10 @@ package com.example.demo;
 
 import com.example.demo.dto.UsuarioDto;
 import com.example.demo.model.PerfilOperario;
+import com.example.demo.model.Rol;
 import com.example.demo.model.Usuario;
 import com.example.demo.repository.PerfilOperarioRepository;
+import com.example.demo.repository.RolRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.service.UsuarioService;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +34,12 @@ class UsuarioServiceTest {
     @Mock
     private PerfilOperarioRepository perfilRepo;
 
+    @Mock
+    private RolRepository rolRepo;
+
+    @Mock
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @Test
     @DisplayName("Crear Operario genera formato EMP-XXXX y persiste PerfilOperario con nivel ABAC")
     void testCrearUsuarioOperario() {
@@ -42,6 +50,8 @@ class UsuarioServiceTest {
         dto.setRol("OPERARIO");
         dto.setNivelAcceso(2);
 
+        when(rolRepo.findByNombre("OPERARIO")).thenReturn(Optional.of(new Rol("OPERARIO")));
+        when(passwordEncoder.encode(any())).thenReturn("encoded");
         when(usuarioRepo.existsById(any())).thenReturn(false);
         when(usuarioRepo.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
         when(perfilRepo.findByIdUsuario(any())).thenReturn(Optional.empty());

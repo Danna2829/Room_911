@@ -24,6 +24,9 @@ public class Usuario {
 
     private String rol; // ADMINISTRADOR, GUARDIA_SEGURIDAD, OPERARIO, SECRETARIA
 
+    @Column(name = "id_rol")
+    private Integer idRol; // Vinculo con el catalogo roles (sincronizado por UsuarioService)
+
     @Column(name = "contrasena", nullable = false)
     @JsonProperty("contraseña")
     @JsonAlias({"contrasena", "contraseña"})
@@ -79,6 +82,9 @@ public class Usuario {
 
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }
+
+    public Integer getIdRol() { return idRol; }
+    public void setIdRol(Integer idRol) { this.idRol = idRol; }
 
     public String getContrasena() { return contrasena; }
     public void setContrasena(String contrasena) { this.contrasena = contrasena; }

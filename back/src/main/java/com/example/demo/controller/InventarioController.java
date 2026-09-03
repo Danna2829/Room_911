@@ -47,4 +47,15 @@ public class InventarioController {
             return ResponseEntity.ok(inventarioRepo.save(inv));
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    /**
+     * Reactiva un movimiento previamente anulado (soft delete inverso).
+     */
+    @PutMapping("/{id}/reactivar")
+    public ResponseEntity<InventarioMedicamento> reactivarMovimiento(@PathVariable Long id) {
+        return inventarioRepo.findById(id).map(inv -> {
+            inv.setActivo(true);
+            return ResponseEntity.ok(inventarioRepo.save(inv));
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

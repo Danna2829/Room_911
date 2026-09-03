@@ -127,3 +127,47 @@ CREATE INDEX IF NOT EXISTS idx_auditoria_timestamp ON registros_auditoria(timest
 1. Crear las entidades JPA correspondientes (`PerfilOperario`, `CategoriaMedicamento`, `CronogramaOperativo`, `SuspensionPermiso`, `TareaAlternativa`, `RegistroAuditoria`).
 2. Implementar repositorios de Spring Data JPA para cada entidad.
 3. Crear el componente `ABACEngineService` para la evaluación dinámica de permisos.
+
+---
+
+# Auditoría #2 — 3 de Septiembre de 2026 (BD viva + evaluación de esquema propuesto)
+
+**Alcance**: inspección de la BD real `Sala_911` en PostgreSQL (podman `postgres-dev`, puerto 5432), verificación del dominio contra `Documentación/Reto_room_911_Extendido.pdf`, y evaluación de la propuesta de reemplazo de esquema (catálogo `roles`, tablas `empleados`, `usuarios` normalizadas, `medicamentos`, `registro_accesos`, `eventos_especiales`).
+
+## 1. Estado de la BD viva (hallazgos)
+
+| # | Hallazgo | Severidad | Acción tomada |
+|---|----------|-----------|---------------|
+| 1 | Cuentas semilla `EMP-0000/0001/0002` quedaron con `estado = false` (desactivadas a las 14:13–14:14 vía borrado lógico del panel de Usuarios, presumiblemente al probar la UI). Con eso el login admin devolvía 403. | 🔴 Crítica | Reactivadas con `UPDATE usuarios SET estado = TRUE`. |
+| 2 | `cronograma_operativo` permitía programar la misma categoría dos veces el mismo día (la auditoría #1 proponía `UNIQUE (fecha, id_categoria)` pero nunca se aplicó). Evaluación ABAC ambigua con duplicados. | 🔴 Alta | Creado índice único **parcial** `uq_cronograma_fecha_categoria_activo ON (fecha, id_categoria) WHERE activo = TRUE` (parcial para no bloquear reprogramación tras soft-delete). |
+| 3 | `registros_auditoria.tipo_evento` / `resultado` sin dominio de valores (cualquier string era válido). | 🟡 Media | Añadidos `CHECK` `chk_tipo_evento` (ENTRADA/SALIDA) y `chk_resultado` (PERMITIDO/DENEGADO). |
+| 4 | `perfiles_operario.id_usuario` nullable (un perfil huérfano rompería el motor ABAC). | 🟡 Media | `ALTER COLUMN ... SET NOT NULL`. |
+| 5 | Faltaban índices de consulta para guardia (`findByIdUsuarioAndActivoTrue`) y trazabilidad por usuario. | 🟢 Baja | Creados `idx_suspensiones_usuario_activo` e `idx_auditoria_usuario`. |
+| 6 | `schema.sql` no reflejaba estos endurecimientos → deriva de esquema entre entornos (no hay Flyway/Liquibase). | 🟡 Media | Cambios replicados en `schema.sql` de forma idempotente; `mvnw test` 10/10 tras el cambio. |
+
+**Pendientes estructurales** (de auditoría anterior, siguen vigentes): contraseñas en texto plano sin BCrypt; `SecurityConfig` con `permitAll`; sin versionado de esquema (Flyway); `spring.sql.init.continue-on-error=true` enmascara fallos de migración en arranque.
+
+## 2. Evaluación del esquema propuesto (¿migrar?)
+
+**Recomendación: NO migrar de forma integral al esquema propuesto.** Comparado con los requisitos del PDF del reto, el esquema actual cubre más y el propuesto obligaría a reescribir ~8 entidades JPA, 7 controladores, el motor ABAC y 6 vistas del frontend, para terminar con **menos cobertura funcional**:
+
+| Requisito del reto (PDF) | Esquema actual | Esquema propuesto |
+|---|---|---|
+| Cronograma operativo diario por categoría (Sección 3, núcleo del ABAC) | ✅ `cronograma_operativo` | ❌ **No existe** — el requisito central sería imposible sin añadirla |
+| Suspensión de permisos por **rango de fechas** (sanción, incapacidad, cambio de turno) | ✅ `suspensiones_permiso` (fecha_inicio/fin) | ⚠️ Solo `empleados.estado 'ACTIVO'/'SUSPENDIDO'` — no soporta rangos |
+| Redirección de tareas alternativas (contingencia) | ✅ `tareas_alternativas` + campo en auditoría | ❌ Solo texto libre `detalles` |
+| Registro de trazabilidad con resultado y motivo | ✅ `registros_auditoria` (con FK) | ⚠️ `registro_accesos` (sin FK a empleado) |
+| Autenticación web de panels (admin/guardia/secretaría) | ✅ correo + contraseña + recuperación por token | ✅ username + contraseña (pero pierde la recuperación ya implementada) |
+| Roles del sistema | ⚠️ string libre en `usuarios.rol` | ⚠️ Catálogo `roles` mejor normalizado, pero **omite SECRETARIA y SUPERADMINISTRADOR** (ya implementados) |
+| Inventario de medicamentos (módulo extendido del frontend) | ✅ `inventario_medicamentos` con lotes y movimientos | ❌ No existe (solo catálogo `medicamentos`) |
+| Categorías con bandera de restringido / soft-delete | ✅ `categorias_medicamento` | ⚠️ `medicamentos.tipo INT` sin banderas ni ciclo de vida |
+
+**Ideas del esquema propuesto que SÍ valen la pena adoptar incrementalmente** (como evolución, no como reemplazo):
+1. **Catálogo `roles`** en lugar del string libre `usuarios.rol` (normalización RBAC; hay que incluir `SUPERADMINISTRADOR` y `SECRETARIA`).
+2. **Separar `empleados` (persona/expediente EMP-XXXX) de `usuarios` (cuenta de acceso)**: coincide con el dominio del reto, donde el operario entra por ID interno y los paneles web usan credenciales.
+3. `eventos_especiales` como bitácora de eventos de guardia distintos al acceso (hojas de incidentes).
+4. Nombres ASCII (`password`) — ya se corrigió en el esquema actual (`contrasena`).
+
+## 3. Cambios aplicados (BD viva + `schema.sql`)
+
+Los seis fixes de la sección 1 fueron aplicados a la BD `Sala_911` y replicados en `back/src/main/resources/schema.sql`. Verificación: `mvnw test` → `Tests run: 10, Failures: 0, Errors: 0` (BUILD SUCCESS).

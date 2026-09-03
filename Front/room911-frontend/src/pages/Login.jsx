@@ -8,6 +8,7 @@ import { Modal } from "../components/ui/Modal";
 import { Alert } from "../components/ui/Alert";
 import { useToast } from "../components/ui/Toast";
 import { useAuth } from "../auth/AuthContext";
+import { homeFor } from "../auth/roles";
 
 const FEATURES = [
   {
@@ -27,7 +28,7 @@ const FEATURES = [
   },
 ];
 
-const RECOVERY_INITIAL = { open: false, step: 1, correo: "", token: "", nueva: "", confirmar: "", loading: false, error: "", msg: "" };
+const RECOVERY_INITIAL = { open: false, step: 1, correo: "", token: "", nueva: "", confirmar: "", loading: false, error: "", msg: "", codigoVisible: false };
 
 export default function Login() {
   const navigate = useNavigate();
@@ -57,9 +58,10 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await login(form.email, form.password);
+      const usuario = await login(form.email, form.password);
       toast.push({ type: "success", title: "Bienvenido", message: "Sesión iniciada correctamente." });
-      navigate("/dashboard");
+      // Cada rol llega a su panel de control correspondiente.
+      navigate(homeFor(usuario.rol));
     } catch (err) {
       const msg = err.response?.data?.mensaje || "No se pudo iniciar sesión.";
       toast.push({ type: "danger", title: "Acceso denegado", message: msg });
@@ -76,10 +78,12 @@ export default function Login() {
     setRecovery((r) => ({ ...r, loading: true, error: "" }));
     try {
       const { data } = await api.post("/auth/recuperar-contrasena", { correo: recovery.correo });
-      setRecovery((r) => ({ ...r, token: data.token, msg: data.mensaje, loading: false }));
-      toast.push({ type: "success", title: "Token generado" });
+      setRecovery((r) => ({ ...r, token: data.codigo, codigoVisible: true, msg: data.mensaje, loading: false }));
+      toast.push({ type: "success", title: "Código generado", message: "Válido por 15 minutos." });
+      // El mensaje con el código se mantiene visible 15 segundos.
+      setTimeout(() => setRecovery((r) => ({ ...r, codigoVisible: false })), 15000);
     } catch (err) {
-      const m = err.response?.data?.mensaje || "No se pudo generar el token.";
+      const m = err.response?.data?.mensaje || "No se pudo generar el código de verificación.";
       setRecovery((r) => ({ ...r, error: m, loading: false }));
     }
   };
@@ -96,7 +100,7 @@ export default function Login() {
     setRecovery((r) => ({ ...r, loading: true, error: "" }));
     try {
       const { data } = await api.post("/auth/restablecer-contrasena", {
-        token: recovery.token,
+        codigo: recovery.token,
         nuevaContrasena: recovery.nueva,
       });
       setRecovery((r) => ({ ...r, msg: data.mensaje, loading: false }));
@@ -220,11 +224,11 @@ export default function Login() {
               </Button>
               {!recovery.token ? (
                 <Button icon="key" loading={recovery.loading} onClick={solicitarToken}>
-                  Generar token
+                  Generar código
                 </Button>
               ) : (
                 <Button icon="arrow-right" onClick={() => setRecovery((r) => ({ ...r, step: 2 }))}>
-                  Usar este token
+                  Usar este código
                 </Button>
               )}
             </>
@@ -243,7 +247,7 @@ export default function Login() {
         {recovery.step === 1 ? (
           <>
             <p className="text-muted mb-3">
-              Ingresa tu correo. Se generará un token de recuperación (válido 15 minutos).
+              Ingresa el correo registrado en el sistema. Se generará un código de verificación de 6 dígitos, válido por 15 minutos.
             </p>
             <TextField
               id="rcorreo"
@@ -255,10 +259,18 @@ export default function Login() {
               onChange={(e) => setRecovery((r) => ({ ...r, correo: e.target.value }))}
               error={recovery.error}
             />
-            {recovery.token && (
+            {recovery.token && recovery.codigoVisible && (
+              <Alert variant="warning">
+                <strong>Código de verificación:</strong>
+                <code className="d-block my-2" style={{ fontSize: "1.6rem", letterSpacing: "0.3em", fontWeight: 700 }}>
+                  {recovery.token}
+                </code>
+                Este mensaje se ocultará en 15 segundos. Anótalo: lo necesitarás en el siguiente paso.
+              </Alert>
+            )}
+            {recovery.token && !recovery.codigoVisible && (
               <Alert variant="info">
-                Token generado: <code className="d-block mt-1">{recovery.token}</code>
-                Cópialo; en el siguiente paso lo usarás para fijar tu nueva contraseña (en producción se enviaría por correo).
+                El código ya no se muestra. Si lo perdiste, genera uno nuevo; continúa al paso 2 si lo tienes anotado.
               </Alert>
             )}
           </>
@@ -266,8 +278,9 @@ export default function Login() {
           <>
             <TextField
               id="rtoken"
-              label="Token"
+              label="Código de verificación"
               icon="key"
+              placeholder="000000"
               value={recovery.token}
               onChange={(e) => setRecovery((r) => ({ ...r, token: e.target.value }))}
             />

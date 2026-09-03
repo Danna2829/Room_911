@@ -68,11 +68,63 @@ export default function Usuarios() {
   const eliminar = async (id) => {
     try {
       await api.delete(`/admin/eliminar-usuario/${id}`);
-      toast.push({ type: "info", title: "Usuario eliminado" });
+      toast.push({ type: "info", title: "Usuario inhabilitado" });
       reload();
     } catch {
-      toast.push({ type: "danger", title: "Error al eliminar" });
+      toast.push({ type: "danger", title: "Error al inhabilitar" });
     }
+  };
+
+  const activar = async (id) => {
+    try {
+      await api.put(`/admin/usuario/${id}/activar`);
+      toast.push({ type: "success", title: "Usuario activado" });
+      reload();
+    } catch {
+      toast.push({ type: "danger", title: "Error al activar" });
+    }
+  };
+
+  // Carga masiva: interpreta lineas CSV (nombre,apellido,correo,rol,nivel,contrasena).
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkTexto, setBulkTexto] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkResult, setBulkResult] = useState(null);
+
+  const submitBulk = async () => {
+    const lineas = bulkTexto
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lineas.length === 0) {
+      toast.push({ type: "danger", title: "Sin datos", message: "Pega al menos una línea CSV." });
+      return;
+    }
+    const usuarios = lineas.map((l) => {
+      const [nombre, apellido, correo, rol, nivel, contrasena] = l.split(",").map((p) => (p || "").trim());
+      const u = { nombre, apellido, correo, rol: rol || "OPERARIO", contrasena: contrasena || undefined };
+      if (nivel) u.nivelAcceso = Number(nivel);
+      return u;
+    });
+    setBulkLoading(true);
+    setBulkResult(null);
+    try {
+      const { data } = await api.post("/admin/crear-usuarios", usuarios);
+      setBulkResult(data);
+      reload();
+    } catch {
+      toast.push({ type: "danger", title: "Error en la carga masiva" });
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const descargarPlantilla = () => {
+    setBulkTexto(
+      "Nombre,Apellido,Correo,Rol(OPERARIO|GUARDIA_SEGURIDAD|SECRETARIA|ADMINISTRADOR),Nivel(1-3 si operario),Contraseña\n" +
+      "Ana,Torres,ana.torres@farmaceutica.com,OPERARIO,1,operario123\n" +
+      "Luis,Mora,luis.mora@farmaceutica.com,SECRETARIA,,secretaria123"
+    );
   };
 
   const resetear = async (u) => {
@@ -130,9 +182,15 @@ export default function Usuarios() {
             <Button variant="soft" size="sm" icon="pencil" onClick={() => openEdit(r)}>
               Editar
             </Button>
-            <Button variant="outline" size="sm" icon="trash" onClick={() => eliminar(r.idUsuario)}>
-              Eliminar
-            </Button>
+            {r.estado ? (
+              <Button variant="outline" size="sm" icon="slash-circle" onClick={() => eliminar(r.idUsuario)}>
+                Inhabilitar
+              </Button>
+            ) : (
+              <Button variant="soft" size="sm" icon="check-circle" onClick={() => activar(r.idUsuario)}>
+                Activar
+              </Button>
+            )}
           </div>
         ),
       },
@@ -143,7 +201,14 @@ export default function Usuarios() {
       <PageHeader
         title="Gestión de Usuarios"
         subtitle="Administración de cuentas, roles y niveles de acceso"
-        actions={<Button icon="person-plus" onClick={openNew}>Nuevo usuario</Button>}
+        actions={
+          <div className="d-flex gap-2">
+            <Button variant="soft" icon="upload" onClick={() => { setBulkOpen(true); setBulkResult(null); }}>
+              Carga masiva
+            </Button>
+            <Button icon="person-plus" onClick={openNew}>Nuevo usuario</Button>
+          </div>
+        }
       />
 
       {loading ? (
@@ -262,6 +327,63 @@ export default function Usuarios() {
             </Alert>
           </>
         ) : null}
+      </Modal>
+
+      <Modal
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        title="Carga masiva de usuarios"
+        footer={
+          <>
+            <Button variant="soft" onClick={() => setBulkOpen(false)}>
+              Cerrar
+            </Button>
+            <Button icon="upload" loading={bulkLoading} onClick={submitBulk}>
+              Procesar carga
+            </Button>
+          </>
+        }
+      >
+        <p className="text-muted small">
+          Pega las líneas en formato CSV: <code>nombre,apellido,correo,rol,nivel,contrasena</code>. El nivel solo aplica a operarios (1 a 3). Los usuarios duplicados por correo se reportan sin abortar el lote.
+        </p>
+        <Button variant="soft" size="sm" icon="file-earmark-text" onClick={descargarPlantilla}>
+          Rellenar con plantilla de ejemplo
+        </Button>
+        <div className="mt-3">
+          <textarea
+            className="form-control font-monospace"
+            rows={8}
+            value={bulkTexto}
+            onChange={(e) => setBulkTexto(e.target.value)}
+            placeholder="Ana,Torres,ana.torres@farmaceutica.com,OPERARIO,1,operario123"
+          />
+        </div>
+        {bulkLoading && (
+          <div className="text-center py-3">
+            <Spinner />
+          </div>
+        )}
+        {bulkResult && (
+          <div className="mt-3">
+            <Alert variant={bulkResult.every((r) => r.ok) ? "success" : "warning"}>
+              Procesadas {bulkResult.length} filas: {bulkResult.filter((r) => r.ok).length} creadas,{" "}
+              {bulkResult.filter((r) => !r.ok).length} con error.
+            </Alert>
+            <ul className="small">
+              {bulkResult.map((r) => (
+                <li key={r.fila}>
+                  Fila {r.fila}:{" "}
+                  {r.ok ? (
+                    <span className="text-success">creada como {r.idUsuario}</span>
+                  ) : (
+                    <span className="text-danger">{r.error}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Modal>
     </>
   );

@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface CronogramaOperativoRepository extends JpaRepository<CronogramaOperativo, Long> {
     Optional<CronogramaOperativo> findByFecha(LocalDate fecha);
     Optional<CronogramaOperativo> findByFechaAndActivoTrue(LocalDate fecha);
+    List<CronogramaOperativo> findAllByFechaAndActivoTrue(LocalDate fecha);
     List<CronogramaOperativo> findByActivoTrue();
     List<CronogramaOperativo> findByFechaBetween(LocalDate inicio, LocalDate fin);
 }

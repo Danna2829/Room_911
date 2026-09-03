@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.AccesoRequestDto;
 import com.example.demo.dto.AccesoResponseDto;
+import com.example.demo.dto.PerfilAccesoDto;
 import com.example.demo.model.RegistroAuditoria;
 import com.example.demo.repository.RegistroAuditoriaRepository;
 import com.example.demo.service.ABACEngineService;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/acceso")
@@ -29,6 +31,27 @@ public class AccesoController {
     public ResponseEntity<AccesoResponseDto> evaluarAcceso(@RequestBody AccesoRequestDto request) {
         AccesoResponseDto respuesta = abacEngineService.evaluarAcceso(request);
         return ResponseEntity.ok(respuesta);
+    }
+
+    /**
+     * Perfil de acceso de un operario para el torniquete: nivel ABAC,
+     * categorias que puede manipular y programacion activa de hoy.
+     */
+    @GetMapping("/perfil/{idUsuario}")
+    public ResponseEntity<PerfilAccesoDto> consultarPerfil(@PathVariable String idUsuario) {
+        PerfilAccesoDto perfil = abacEngineService.consultarPerfilAcceso(idUsuario.trim());
+        if (perfil.getIdUsuario() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(perfil);
+    }
+
+    /**
+     * Tarea alternativa del plan de contingencia (redireccion tras intentos fallidos).
+     */
+    @GetMapping("/tarea-alternativa")
+    public ResponseEntity<Map<String, String>> tareaAlternativa() {
+        return ResponseEntity.ok(Map.of("tareaAlternativa", abacEngineService.obtenerTareaAlternativaString()));
     }
 
     /**

@@ -30,4 +30,22 @@ public class ReporteController {
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .body(csvData);
     }
+
+    @GetMapping("/exportar/xlsx")
+    public ResponseEntity<byte[]> exportarXLSX() throws java.io.IOException {
+        byte[] archivo = reporteService.exportarXLSX();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_room911.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(archivo);
+    }
+
+    @GetMapping("/exportar/pdf")
+    public ResponseEntity<byte[]> exportarPDF() throws java.io.IOException {
+        byte[] archivo = reporteService.exportarPDF();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_room911.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(archivo);
+    }
 }

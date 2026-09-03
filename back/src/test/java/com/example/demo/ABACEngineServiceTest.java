@@ -86,7 +86,7 @@ class ABACEngineServiceTest {
         CronogramaOperativo cronogramaHoy = new CronogramaOperativo(LocalDate.now(), 4L, "Procesamiento Tipo 4");
         CategoriaMedicamento cat4 = new CategoriaMedicamento("TIPO_4", "Medicamento Tipo 4 Restringido", "Alto Control", true);
 
-        when(cronogramaRepo.findByFecha(LocalDate.now())).thenReturn(Optional.of(cronogramaHoy));
+        when(cronogramaRepo.findAllByFechaAndActivoTrue(LocalDate.now())).thenReturn(List.of(cronogramaHoy));
         when(categoriaRepo.findById(4L)).thenReturn(Optional.of(cat4));
         when(perfilRepo.findByIdUsuario("EMP-8821")).thenReturn(Optional.of(new PerfilOperario("EMP-8821", 1, "Operario Nivel 1")));
 
@@ -112,7 +112,7 @@ class ABACEngineServiceTest {
         CronogramaOperativo cronogramaHoy = new CronogramaOperativo(LocalDate.now(), 5L, "Procesamiento Tipo 5");
         CategoriaMedicamento cat5 = new CategoriaMedicamento("TIPO_5", "Medicamento Tipo 5", "Control Especial", false);
 
-        when(cronogramaRepo.findByFecha(LocalDate.now())).thenReturn(Optional.of(cronogramaHoy));
+        when(cronogramaRepo.findAllByFechaAndActivoTrue(LocalDate.now())).thenReturn(List.of(cronogramaHoy));
         when(categoriaRepo.findById(5L)).thenReturn(Optional.of(cat5));
         when(perfilRepo.findByIdUsuario("EMP-8822")).thenReturn(Optional.of(new PerfilOperario("EMP-8822", 2, "Operario Nivel 2")));
 

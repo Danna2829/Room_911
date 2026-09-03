@@ -1,55 +1,34 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 import { PageHeader } from "../components/ui/PageHeader";
-import { StatCard } from "../components/ui/feedback";
+import { StatCard, StatusPill, Spinner } from "../components/ui/feedback";
 import { Button } from "../components/ui/Button";
-import { Icon } from "../components/ui/Icon";
-import { StatusPill } from "../components/ui/feedback";
-import { DataTable } from "../components/ui/DataTable";
-import { Modal } from "../components/ui/Modal";
 import { Alert } from "../components/ui/Alert";
-import { TextField, SelectField } from "../components/ui/inputs";
+import { DataTable } from "../components/ui/DataTable";
+import { useFetch } from "../hooks/useFetch";
+import { fmtDateTime } from "../utils/format";
 
-const ACCESOS = [
-  { id: 1, operario: "Pedro Operario 3", nivel: "Nivel 3", medicamento: "Tipo 4 (Restringido)", estado: "Permitido", hora: "08:42" },
-  { id: 2, operario: "Juan Operario 1", nivel: "Nivel 1", medicamento: "Tipo 1", estado: "Permitido", hora: "08:51" },
-  { id: 3, operario: "Maria Operario 2", nivel: "Nivel 2", medicamento: "Tipo 5", estado: "En espera", hora: "09:03" },
-  { id: 4, operario: "Carlos Guardia", nivel: "—", medicamento: "Supervisión", estado: "Permitido", hora: "09:10" },
-  { id: 5, operario: "Juan Operario 1", nivel: "Nivel 1", medicamento: "Tipo 4 (Restringido)", estado: "Bloqueado", hora: "09:22" },
-];
-
-const ESTADO_TONE = { Permitido: "success", Bloqueado: "danger", "En espera": "warning" };
+function apiGetResumen() {
+  return api.get("/dashboard/resumen").then((r) => r.data);
+}
 
 export default function Dashboard() {
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { data: resumen, loading, error } = useFetch(() => apiGetResumen());
 
   const columns = [
-    { key: "operario", label: "Operario", sortable: true },
+    { key: "idUsuario", label: "Operario", sortable: true },
+    { key: "timestamp", label: "Fecha/Hora", sortable: true, render: (r) => fmtDateTime(r.timestamp) },
+    { key: "tipoEvento", label: "Evento", sortable: true },
     {
-      key: "nivel",
-      label: "Nivel ABAC",
+      key: "resultado",
+      label: "Resultado",
       sortable: true,
-      render: (r) => (r.nivel === "—" ? <span className="text-muted-2">—</span> : <StatusPill tone="info">{r.nivel}</StatusPill>),
+      render: (r) => (
+        <StatusPill tone={r.resultado === "PERMITIDO" ? "success" : "danger"}>{r.resultado}</StatusPill>
+      ),
     },
-    { key: "medicamento", label: "Medicamento", sortable: true },
-    {
-      key: "estado",
-      label: "Estado",
-      sortable: true,
-      render: (r) => <StatusPill tone={ESTADO_TONE[r.estado]}>{r.estado}</StatusPill>,
-    },
-    { key: "hora", label: "Hora", sortable: true },
-  ];
-
-  const filters = [
-    {
-      key: "estado",
-      label: "Todos los estados",
-      options: [
-        { value: "Permitido", label: "Permitido" },
-        { value: "Bloqueado", label: "Bloqueado" },
-        { value: "En espera", label: "En espera" },
-      ],
-    },
+    { key: "motivoRechazo", label: "Motivo de rechazo", render: (r) => r.motivoRechazo || "—" },
   ];
 
   return (
@@ -58,80 +37,60 @@ export default function Dashboard() {
         title="Panel General"
         subtitle="Visión operativa de la sala restringida room_911"
         actions={
-          <>
-            <Button variant="soft" icon="download">
-              Exportar
-            </Button>
-            <Button icon="plus-lg" onClick={() => setOpen(true)}>
-              Nuevo acceso
-            </Button>
-          </>
-        }
-      />
-
-      <Alert variant="info" className="mb-4">
-        Datos de demostración del design system. Las vistas de operación se construirán sobre estos mismos componentes.
-      </Alert>
-
-      <div className="row g-3 mb-4">
-        <div className="col-12 col-sm-6 col-xl-3">
-          <StatCard icon="shield-check" tone="primary" label="Accesos hoy" value="128" trend="+12% vs ayer" />
-        </div>
-        <div className="col-12 col-sm-6 col-xl-3">
-          <StatCard icon="x-octagon" tone="danger" label="Bloqueados" value="3" trend="Por matriz de riesgo" />
-        </div>
-        <div className="col-12 col-sm-6 col-xl-3">
-          <StatCard icon="capsule" tone="success" label="Medicamentos" value="42" trend="8 categorías" />
-        </div>
-        <div className="col-12 col-sm-6 col-xl-3">
-          <StatCard icon="people" tone="warning" label="Operarios activos" value="17" trend="3 en sala" />
-        </div>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={ACCESOS}
-        searchKeys={["operario", "medicamento", "estado"]}
-        filters={filters}
-        emptyText="No hay accesos que coincidan con el filtro."
-        toolbar={
-          <Button variant="outline" size="sm" icon="funnel">
-            Más filtros
+          <Button icon="activity" onClick={() => navigate("/monitor")}>
+            Ver monitor en vivo
           </Button>
         }
       />
 
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Registrar nuevo acceso"
-        footer={
-          <>
-            <Button variant="soft" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button icon="check-lg" onClick={() => setOpen(false)}>
-              Confirmar
-            </Button>
-          </>
-        }
-      >
-        <TextField id="op" label="ID de operario" icon="person-badge" placeholder="EMP-0000" />
-        <SelectField
-          id="med"
-          label="Tipo de medicamento"
-          options={[
-            { value: "", label: "Selecciona..." },
-            { value: "1", label: "Tipo 1" },
-            { value: "2", label: "Tipo 2" },
-            { value: "4", label: "Tipo 4 (Restringido)" },
-            { value: "5", label: "Tipo 5" },
-          ]}
-        />
-        <p className="text-muted small mb-0">
-          <Icon name="info-circle" /> El motor ABAC evaluará riesgo y cronograma al guardar.
-        </p>
-      </Modal>
+      {loading ? (
+        <div className="text-center py-5">
+          <Spinner />
+        </div>
+      ) : error ? (
+        <Alert variant="danger">No se pudo cargar el resumen. Verifica que el backend esté corriendo.</Alert>
+      ) : (
+        <>
+          <div className="row g-3 mb-4">
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard icon="shield-check" tone="primary" label="Accesos hoy" value={resumen.accesosHoy} />
+            </div>
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard icon="x-octagon" tone="danger" label="Denegados hoy" value={resumen.denegadosHoy} />
+            </div>
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard icon="capsule" tone="success" label="Medicamentos activos" value={resumen.medicamentosActivos} />
+            </div>
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard icon="people" tone="warning" label="Operarios activos" value={resumen.operariosActivos} />
+            </div>
+          </div>
+
+          <div className="row g-3 mb-4">
+            <div className="col-12 col-sm-6">
+              <Alert variant="info">
+                <strong>Programación de hoy:</strong>{" "}
+                {resumen.programadosHoy > 0
+                  ? `${resumen.programadosHoy} categoría(s) activa(s) en room_911`
+                  : "Sin categorías programadas por Secretaría"}
+              </Alert>
+            </div>
+            <div className="col-12 col-sm-6">
+              <Alert variant={resumen.suspensionesVigentes > 0 ? "warning" : "success"}>
+                <strong>Suspensiones vigentes:</strong> {resumen.suspensionesVigentes} (a cargo de la Guardia)
+              </Alert>
+            </div>
+          </div>
+
+          <h5 className="mb-3">Últimos accesos registrados</h5>
+          <DataTable
+            columns={columns}
+            data={resumen.ultimosAccesos || []}
+            searchKeys={["idUsuario", "resultado", "tipoEvento"]}
+            emptyText="Aún no hay accesos registrados."
+          />
+        </>
+      )}
     </>
   );
 }

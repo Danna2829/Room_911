@@ -12,16 +12,16 @@ export default function Reportes() {
   const toast = useToast();
   const { data: accesos, loading, error } = useFetch(() => api.get("/reportes/accesos").then((r) => r.data));
 
-  const exportCSV = async () => {
+  const exportar = async (formato) => {
     try {
-      const { data } = await api.get("/reportes/exportar/csv", { responseType: "blob" });
+      const { data } = await api.get(`/reportes/exportar/${formato}`, { responseType: "blob" });
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "reporte_room911.csv";
+      a.download = `reporte_room911.${formato}`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.push({ type: "success", title: "Reporte exportado" });
+      toast.push({ type: "success", title: `Reporte ${formato.toUpperCase()} exportado` });
     } catch {
       toast.push({ type: "danger", title: "Error al exportar" });
     }
@@ -50,7 +50,13 @@ export default function Reportes() {
       <PageHeader
         title="Reportes & Auditoría"
         subtitle="Trazabilidad de accesos y exportación de evidencias"
-        actions={<Button icon="download" onClick={exportCSV}>Exportar CSV</Button>}
+        actions={
+          <div className="d-flex gap-2">
+            <Button variant="soft" icon="filetype-csv" onClick={() => exportar("csv")}>CSV</Button>
+            <Button variant="soft" icon="file-earmark-excel" onClick={() => exportar("xlsx")}>Excel</Button>
+            <Button icon="file-earmark-pdf" onClick={() => exportar("pdf")}>PDF</Button>
+          </div>
+        }
       />
 
       <div className="row g-3 mb-4">
