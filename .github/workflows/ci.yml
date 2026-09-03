@@ -57,7 +57,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11
+          version: 11.25.0
 
       - name: Install dependencies
         working-directory: Front/room911-frontend
