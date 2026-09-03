@@ -61,7 +61,9 @@ jobs:
 
       - name: Install dependencies
         working-directory: Front/room911-frontend
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          pnpm install --no-frozen-lockfile > /tmp/install.log 2>&1 || { tail -120 /tmp/install.log >> "$GITHUB_STEP_SUMMARY"; exit 1; }
+          tail -5 /tmp/install.log
 
       - name: Build
         working-directory: Front/room911-frontend
