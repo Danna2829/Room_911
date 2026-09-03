@@ -385,4 +385,19 @@ Este documento registra la trazabilidad continua de los avances, decisiones téc
 - Como se hizo: sin npm (pnpm), sin heredocs; migraciones idempotentes en BD viva y schema.sql; verificacion con curl/psql y tests.
 - Que sigue: push a GitHub para activar CI (requiere credenciales del usuario); renovacion de token; pruebas end-to-end automatizadas adicionales si se requiere.
 
+## Entrada de Handoff #020
+
+- Fecha: 3 de Septiembre de 2026
+- Tema: Limpieza de controles decorativos: eliminados los botones/campos que no ejecutaban accion alguna.
+
+- Que se hizo:
+  1. Barrido de toda la UI buscando controles sin funcion (botones sin onClick, checkboxes decorativos, placeholders muertos).
+  2. Topbar: eliminados el buscador "Buscar en el sistema..." (nunca recibia onSearch), y los botones Notificaciones, Ayuda y Perfil (sin handler). Solo queda "Salir" (funcional).
+  3. Login: eliminado el checkbox "Recuérdame" (decorativo, no persistia nada).
+  4. Eliminado el item de navegacion "Configuración", su ruta /config y la pagina placeholder ComingSoon.jsx.
+  5. Conservados tras verificacion: buscador de cada DataTable (filtra en vivo), "Recuérdame" fuera, checkbox de medicamento restringido (vinculado a estado del form), botones "Ver monitor en vivo" (navega), evaluacion Garita (submit real).
+  6. pnpm build OK; verificado en navegador: topbar solo con Salir, sin Configuracion en el menu.
+- Como se hizo: sin npm (pnpm), sin heredocs; barrido con grep de botones sin onClick y revision manual del Topbar/Login.
+- Que sigue: push a GitHub para activar CI; renovacion de token opcional; pruebas e2e adicionales.
+
 

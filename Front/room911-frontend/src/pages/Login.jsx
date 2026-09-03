@@ -183,13 +183,7 @@ export default function Login() {
               autoComplete="current-password"
             />
 
-            <div className="d-flex align-items-center justify-content-between mb-4">
-              <div className="form-check">
-                <input className="form-check-input" type="checkbox" id="remember" />
-                <label className="form-check-label small text-muted" htmlFor="remember">
-                  Recuérdame
-                </label>
-              </div>
+            <div className="d-flex align-items-center justify-content-end mb-4">
               <button
                 type="button"
                 className="btn btn-link p-0 small fw-semibold"

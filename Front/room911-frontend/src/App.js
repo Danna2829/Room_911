@@ -14,7 +14,6 @@ import Usuarios from "./pages/Usuarios";
 import Medicamentos from "./pages/Medicamentos";
 import Inventario from "./pages/Inventario";
 import Reportes from "./pages/Reportes";
-import ComingSoon from "./pages/ComingSoon";
 
 // Protege cada ruta segun el rol del usuario autenticado.
 function RoleRoute({ path, children }) {
@@ -47,7 +46,6 @@ export default function App() {
               <Route path="/medicamentos" element={<RoleRoute path="/medicamentos"><Medicamentos /></RoleRoute>} />
               <Route path="/inventario" element={<RoleRoute path="/inventario"><Inventario /></RoleRoute>} />
               <Route path="/reportes" element={<RoleRoute path="/reportes"><Reportes /></RoleRoute>} />
-              <Route path="/config" element={<RoleRoute path="/config"><ComingSoon title="Configuración" /></RoleRoute>} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

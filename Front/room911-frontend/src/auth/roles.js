@@ -38,12 +38,6 @@ export const NAV_SECTIONS = [
       { to: "/reportes", label: "Reportes & Auditoría", icon: "clipboard-data", roles: ["SUPERADMINISTRADOR", "ADMINISTRADOR", "GUARDIA_SEGURIDAD", "SECRETARIA"] },
     ],
   },
-  {
-    label: "Sistema",
-    items: [
-      { to: "/config", label: "Configuración", icon: "gear", roles: ["SUPERADMINISTRADOR", "ADMINISTRADOR"] },
-    ],
-  },
 ];
 
 export const canAccess = (rol, path) =>
